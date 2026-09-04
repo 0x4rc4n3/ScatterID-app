@@ -1,0 +1,26 @@
+{
+  "name": "scatterid-app",
+  "version": "1.0.0",
+  "description": "Interactive Web Portal & Demonstration Workbench for ScatterID Post-Quantum ZK Identity Infrastructure",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "canonicalize": "^4.0.0",
+    "compression": "^1.7.5",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0"
+  },
+  "keywords": [
+    "post-quantum",
+    "identity",
+    "zero-knowledge",
+    "nist-fips-204",
+    "hyperledger-fabric"
+  ],
+  "author": "ScatterID",
+  "license": "PolyForm-Noncommercial-1.0.0"
+}

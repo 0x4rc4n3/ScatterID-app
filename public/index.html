@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScatterID — Post-Quantum Zero-Knowledge Identity Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <span class="brand-title">Scatter<span class="brand-accent">ID</span></span>
+        <span class="brand-badge">NIST FIPS 204</span>
+      </div>
+
+      <nav class="nav-tabs" id="tab-nav">
+        <button class="tab-btn active" data-tab="tab-issue">1. Issue Identity</button>
+        <button class="tab-btn" data-tab="tab-verify">2. Verify Proof</button>
+        <button class="tab-btn" data-tab="tab-tamper">3. Tamper & Attack Test</button>
+        <button class="tab-btn" data-tab="tab-architecture">Architecture & Math</button>
+      </nav>
+
+      <div class="nav-status">
+        <span class="status-dot" id="gw-indicator"></span>
+        <span class="status-label" id="gw-status-text">Checking Gateway...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="main-wrapper">
+
+    <!-- TAB 1: HOLDER STUDIO (ISSUANCE) -->
+    <section id="tab-issue" class="view-panel active">
+      <div class="view-header">
+        <div>
+          <h2>Holder Studio — Zero-Knowledge Credential Issuance</h2>
+          <p class="view-desc">
+            Raw identity attributes are canonicalized and salted on your local device.
+            <strong>Only a one-way SHA3-256 cryptographic commitment is transmitted to the network.</strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- Preset Claim Selection -->
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Select Demonstration Identity Preset</h3>
+          <span class="badge-subtle">Pre-configured Real World Examples</span>
+        </div>
+        <div class="presets-row" id="presets-container">
+          <!-- Populated by JavaScript -->
+          <button class="btn-preset active" data-preset="kyc-identity">National ID (Age 21+ Proof)</button>
+          <button class="btn-preset" data-preset="healthcare-clearance">Medical Practitioner License</button>
+          <button class="btn-preset" data-preset="fintech-investor">Accredited Investor Proof</button>
+          <button class="btn-preset" data-preset="academic-degree">University Degree Credential</button>
+        </div>
+      </div>
+
+      <!-- Editor & Cryptographic Breakdown Grid -->
+      <div class="grid-split">
+        <!-- Left: Claim Editor -->
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Raw Identity Attributes (Client-Side)</h3>
+            <span class="pill-privacy">Never leaves your browser</span>
+          </div>
+          <p class="card-hint">Edit any value below. All transformation happens locally before signing.</p>
+          <textarea id="claim-editor" class="code-editor" rows="13" spellcheck="false"></textarea>
+          
+          <div class="actions-row">
+            <button id="btn-rehash" class="btn btn-secondary">Regenerate Salt & Hash</button>
+            <button id="btn-issue" class="btn btn-primary">
+              <span>⚡</span> Issue Quantum Credential
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Cryptographic Telemetry -->
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Cryptographic Transformation Telemetry</h3>
+            <span class="badge-subtle">Deterministic Pipeline</span>
+          </div>
+
+          <div class="telemetry-block">
+            <div class="telemetry-label">
+              <span>1. Cryptographic Salt (16-byte CSPRNG)</span>
+              <span class="label-info">Prevents rainbow table & dictionary attacks</span>
+            </div>
+            <div class="hash-box" id="disp-salt">—</div>
+          </div>
+
+          <div class="telemetry-block">
+            <div class="telemetry-label">
+              <span>2. Deterministic Canonicalization (RFC 8785 JCS)</span>
+              <span class="label-info">Normalized byte encoding across platforms</span>
+            </div>
+            <pre class="telemetry-pre" id="disp-canonical">—</pre>
+          </div>
+
+          <div class="telemetry-block highlight-block">
+            <div class="telemetry-label">
+              <span>3. Transmitted Commitment (SHA3-256)</span>
+              <span class="label-info text-emerald">The ONLY data sent over the wire</span>
+            </div>
+            <div class="hash-box hash-emerald" id="disp-datahash">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issuance Result Container -->
+      <div id="issue-result-card" class="section-card result-card hidden">
+        <div class="card-header">
+          <div class="result-title-group">
+            <span class="badge-success">✓ Issued Successfully</span>
+            <h3>Quantum-Signed Digital Credential</h3>
+          </div>
+          <div class="result-actions">
+            <button id="btn-copy-cred" class="btn btn-sm btn-secondary">Copy JSON</button>
+            <button id="btn-send-to-verify" class="btn btn-sm btn-accent">Send to Verifier →</button>
+          </div>
+        </div>
+
+        <div class="cred-preview-grid">
+          <div class="cred-meta">
+            <div class="meta-item">
+              <span class="meta-label">Credential ID:</span>
+              <span class="meta-val mono" id="res-cred-id">—</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Signature Algorithm:</span>
+              <span class="meta-val mono text-cyan">ML-DSA-65 (NIST FIPS 204 Lattice)</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Public Key Fingerprint:</span>
+              <span class="meta-val mono" id="res-pubkey-id">—</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Blockchain Anchor:</span>
+              <span class="meta-val mono" id="res-tx-id">—</span>
+            </div>
+          </div>
+          <div class="cred-json-wrapper">
+            <pre class="code-pre" id="res-raw-json"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: VERIFIER PORTAL (ZERO KNOWLEDGE) -->
+    <section id="tab-verify" class="view-panel">
+      <div class="view-header">
+        <div>
+          <h2>Verifier Portal — Fail-Closed Proof Validation</h2>
+          <p class="view-desc">
+            Verifies the mathematical post-quantum signature against HashiCorp Vault KMS public keys 
+            and checks revocation state on the <strong>Hyperledger Fabric blockchain</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid-split">
+        <!-- Verification Input Form -->
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Verification Parameters</h3>
+            <span class="badge-subtle">Online or Standalone Offline</span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-verify-cred-id">Credential UUID:</label>
+            <input type="text" id="input-verify-cred-id" class="text-input mono" placeholder="e.g. 8f92a10c-39b1-4f11-9a72-..." />
+          </div>
+
+          <div class="form-group">
+            <label for="input-verify-datahash">Expected SHA3-256 Data Commitment:</label>
+            <input type="text" id="input-verify-datahash" class="text-input mono" placeholder="64-character hex hash commitment" />
+          </div>
+
+          <div class="actions-row">
+            <button id="btn-submit-verify" class="btn btn-primary">
+              <span>🛡</span> Verify Cryptographic Authenticity
+            </button>
+            <button id="btn-load-latest" class="btn btn-secondary">Load Latest Issued</button>
+          </div>
+        </div>
+
+        <!-- Verification Result & Audit Proof -->
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Verification Outcome & Verification Proof</h3>
+          </div>
+
+          <div id="verify-placeholder" class="placeholder-box">
+            <span class="placeholder-icon">⚖</span>
+            <p>Submit a credential ID or cryptographic commitment to execute verification.</p>
+          </div>
+
+          <div id="verify-verdict-box" class="verdict-box hidden">
+            <div id="verdict-banner" class="verdict-banner">
+              <span id="verdict-icon">✓</span>
+              <div>
+                <h4 id="verdict-title">CRYPTOGRAPHICALLY VALID</h4>
+                <p id="verdict-subtitle">ML-DSA-65 lattice signature matches and anchor is active on-chain.</p>
+              </div>
+            </div>
+
+            <div class="verdict-details">
+              <div class="detail-row">
+                <span>Cryptographic Lattice Signature:</span>
+                <span id="verdict-sig-status" class="badge-status">VALID (FIPS 204)</span>
+              </div>
+              <div class="detail-row">
+                <span>Hyperledger Fabric Ledger Anchor:</span>
+                <span id="verdict-ledger-status" class="badge-status">CONFIRMED ACTIVE</span>
+              </div>
+              <div class="detail-row">
+                <span>Plaintext Identity Disclosure:</span>
+                <span class="badge-status text-emerald">0 BYTES (Zero Knowledge)</span>
+              </div>
+              <div class="detail-row">
+                <span>Verification Time:</span>
+                <span id="verdict-time" class="mono">14 ms</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: ADVERSARY & TAMPER TEST -->
+    <section id="tab-tamper" class="view-panel">
+      <div class="view-header">
+        <div>
+          <h2>Adversary Simulation — Live Tamper & Forgery Test</h2>
+          <p class="view-desc">
+            Cryptographic proofs are unforgeable. Test what happens when an attacker modifies 
+            even a single character in a claim or corrupts a cryptographic hash commitment.
+          </p>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Adversary Attack Presets</h3>
+          <span class="badge-danger">Simulate Threat Vectors</span>
+        </div>
+        <p class="card-hint">Choose an attack scenario to observe mathematical rejection:</p>
+        <div class="attack-buttons-row">
+          <button class="btn-attack" id="attack-name">
+            <strong>Attack 1: Identity Impersonation</strong>
+            <span>Change recipient name to unauthorized impostor</span>
+          </button>
+          <button class="btn-attack" id="attack-age">
+            <strong>Attack 2: Age Forgery</strong>
+            <span>Increment birthdate year to bypass age gate (21+)</span>
+          </button>
+          <button class="btn-attack" id="attack-hash">
+            <strong>Attack 3: Bit-Flip Attack</strong>
+            <span>Flip 1 bit in the SHA3-256 commitment</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid-split">
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Tampered Payload Editor</h3>
+            <span class="pill-danger">Modified Data</span>
+          </div>
+          <textarea id="tamper-editor" class="code-editor" rows="12" spellcheck="false"></textarea>
+          
+          <div class="actions-row">
+            <button id="btn-run-tamper-test" class="btn btn-danger">
+              <span>⚡</span> Run Adversary Verification
+            </button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Cryptographic Integrity Verdict</h3>
+          </div>
+
+          <div id="tamper-verdict-box" class="verdict-box">
+            <div id="tamper-banner" class="verdict-banner banner-neutral">
+              <span id="tamper-icon">ℹ</span>
+              <div>
+                <h4 id="tamper-title">Awaiting Adversary Execution</h4>
+                <p id="tamper-subtitle">Select an attack vector above or modify the payload directly.</p>
+              </div>
+            </div>
+
+            <div class="telemetry-block" style="margin-top: 16px;">
+              <div class="telemetry-label">
+                <span>Original Registered Commitment:</span>
+              </div>
+              <div class="hash-box" id="tamper-orig-hash">—</div>
+            </div>
+
+            <div class="telemetry-block">
+              <div class="telemetry-label">
+                <span>Tampered Recomputed Commitment:</span>
+              </div>
+              <div class="hash-box hash-danger" id="tamper-new-hash">—</div>
+            </div>
+
+            <div class="telemetry-block" id="tamper-explanation-block" style="display: none;">
+              <div class="telemetry-label">
+                <span>Cryptographic Reason:</span>
+              </div>
+              <p class="tamper-explanation" id="tamper-explanation-text"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ARCHITECTURE & STANDARDS -->
+    <section id="tab-architecture" class="view-panel">
+      <div class="view-header">
+        <div>
+          <h2>Technical Architecture & Cryptographic Standards</h2>
+          <p class="view-desc">
+            ScatterID provides an open reference architecture for post-quantum zero-knowledge digital identity.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid-cards">
+        <div class="section-card">
+          <div class="card-header">
+            <h3>NIST FIPS 204 (ML-DSA-65)</h3>
+            <span class="badge-subtle">Post-Quantum Signature</span>
+          </div>
+          <p class="card-text">
+            Standardized in August 2024 by NIST. ML-DSA (Module-Lattice Digital Signature Algorithm) relies 
+            on the hardness of lattice problems (Module Learning with Errors). Unlike RSA-2048 and ECDSA, 
+            ML-DSA-65 remains unbreakable by Shor's algorithm on quantum computers.
+          </p>
+          <ul class="spec-list">
+            <li><strong>Public Key Size:</strong> 1,952 bytes</li>
+            <li><strong>Signature Size:</strong> 3,309 bytes</li>
+            <li><strong>Security Level:</strong> NIST Category 3 (AES-192 equivalent)</li>
+          </ul>
+        </div>
+
+        <div class="section-card">
+          <div class="card-header">
+            <h3>RFC 8785 Canonicalization (JCS)</h3>
+            <span class="badge-subtle">Deterministic JSON</span>
+          </div>
+          <p class="card-text">
+            Computers and programming languages serialize JSON differently (key order, spacing, floating-point formatting). 
+            RFC 8785 guarantees that identical JSON objects serialize to the exact same byte string across Node.js, Python, 
+            Go, and C runtimes.
+          </p>
+          <ul class="spec-list">
+            <li><strong>Key Ordering:</strong> Strict UTF-16 code unit order</li>
+            <li><strong>Whitespace:</strong> Completely stripped</li>
+            <li><strong>Number Format:</strong> IEEE 754 deterministic serialization</li>
+          </ul>
+        </div>
+
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Hyperledger Fabric Ledger</h3>
+            <span class="badge-subtle">Permissioned Consensus</span>
+          </div>
+          <p class="card-text">
+            Enterprise distributed ledger running Raft crash fault tolerant (CFT) consensus. Stores credential 
+            fingerprints and revocation states without storing sensitive user identities. Verifiers query the ledger 
+            to ensure credentials haven't been revoked by the issuing authority.
+          </p>
+          <ul class="spec-list">
+            <li><strong>Chaincode:</strong> <code>scatterproof</code> (Go contractapi)</li>
+            <li><strong>Consensus:</strong> Raft Orderer</li>
+            <li><strong>State Storage:</strong> Immutable ledger history + state database</li>
+          </ul>
+        </div>
+
+        <div class="section-card">
+          <div class="card-header">
+            <h3>HashiCorp Vault KMS</h3>
+            <span class="badge-subtle">HSM Key Isolation</span>
+          </div>
+          <p class="card-text">
+            Master ML-DSA-65 signing keys are never stored on disk in plaintext. HashiCorp Vault manages key lifecycle, 
+            cryptographic zeroization in memory, and allows one-click post-quantum key rotation without service downtime.
+          </p>
+          <ul class="spec-list">
+            <li><strong>Auth:</strong> AppRole token authentication</li>
+            <li><strong>Key Storage:</strong> Isolated KV v2 post-quantum secrets engine</li>
+            <li><strong>Memory Hygiene:</strong> Explicit zeroization upon key rotation</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Comparative Table -->
+      <div class="section-card" style="margin-top: 24px;">
+        <div class="card-header">
+          <h3>Cryptographic Paradigm Comparison</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Classical Identity (RSA / ECDSA)</th>
+              <th>ScatterID (Post-Quantum ZK)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Quantum Threat (Shor's Algorithm)</strong></td>
+              <td class="text-danger">Vulnerable (Broken in polynomial time)</td>
+              <td class="text-emerald">Resistant (NIST FIPS 204 Lattice Math)</td>
+            </tr>
+            <tr>
+              <td><strong>Identity Privacy</strong></td>
+              <td class="text-warning">Plaintext attributes sent over network</td>
+              <td class="text-emerald">Zero Knowledge (Client salted SHA3-256)</td>
+            </tr>
+            <tr>
+              <td><strong>Offline Verification</strong></td>
+              <td class="text-warning">Requires central issuer server ping</td>
+              <td class="text-emerald">Standalone mathematical verification</td>
+            </tr>
+            <tr>
+              <td><strong>Revocation Mechanism</strong></td>
+              <td>Centralized CRL / OCSP</td>
+              <td class="text-emerald">Immutable Hyperledger Fabric Ledger</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <span class="footer-brand">ScatterID Post-Quantum Identity Infrastructure</span>
+        <p class="footer-sub">Open-source, decentralized reference framework for quantum-safe digital identity.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/0x4rc4n3/ScatterID" target="_blank" rel="noreferrer">Core Engine (GitHub)</a>
+        <a href="https://github.com/0x4rc4n3/ScatterID-app" target="_blank" rel="noreferrer">App Repository</a>
+        <a href="/healthz" target="_blank">Health Status</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
