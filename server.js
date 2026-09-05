@@ -2,7 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import compression from 'compression';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { createHash, randomBytes } from 'crypto';
 import canonicalize from 'canonicalize';
 
@@ -241,9 +241,15 @@ app.post('/api/verify', async (req, res) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`========================================================`);
-  console.log(`  ScatterID App Service running at http://0.0.0.0:${PORT}`);
-  console.log(`  Gateway API Target: ${GATEWAY_URL}`);
-  console.log(`========================================================`);
-});
+const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectRun && process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`========================================================`);
+    console.log(`  ScatterID App Service running at http://0.0.0.0:${PORT}`);
+    console.log(`  Gateway API Target: ${GATEWAY_URL}`);
+    console.log(`========================================================`);
+  });
+}
+
+export { app, SAMPLE_PRESETS };
