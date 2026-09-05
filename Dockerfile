@@ -14,7 +14,6 @@ ENV PORT=8080
 COPY package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY server.js ./
-COPY public ./public
 
 EXPOSE 8080
 

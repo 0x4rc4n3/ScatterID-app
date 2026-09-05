@@ -1,79 +1,100 @@
-# ScatterID App — Post-Quantum Identity Portal
+# ScatterID App — Gateway Proxy & Demonstration Service
 
-[![Live Demo](https://img.shields.io/badge/Demo-scatterid.app-00F5A0.svg)](https://scatterid.app)
 [![Cryptography](https://img.shields.io/badge/Crypto-NIST_FIPS_204_(ML--DSA--65)-blue.svg)](https://csrc.nist.gov/pubs/fips/204/final)
 [![Ledger](https://img.shields.io/badge/Ledger-Hyperledger_Fabric-purple.svg)](https://www.hyperledger.org/projects/fabric)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0.0-blue.svg)](LICENSE)
 
-The official web application and demonstration portal for **ScatterID** — decentralized, zero-knowledge identity verification infrastructure built for the post-quantum era.
+Backend application proxy and local cryptographic formatting service for the **ScatterID** post-quantum zero-knowledge identity verification ecosystem.
 
 ---
 
-## Overview
+## 1. Architectural Role & Service Scope
 
-**ScatterID App** delivers an interactive, high-fidelity user experience to demonstrate quantum-safe, privacy-preserving digital credentials. It directly interfaces with the ScatterID Verification Gateway API, HashiCorp Vault KMS, and Hyperledger Fabric blockchain ledger.
+**ScatterID App** operates as an application-tier reverse proxy and local commitment generation engine positioned between user clients (wallets, verifier portals) and the core ScatterID Verification Gateway API (`:3000`):
 
-Unlike traditional digital identity systems that transmit raw personal data over the wire, ScatterID enforces strict data minimization: **raw attributes never leave the user's device**.
+1. **Client-Side Salting & Canonicalization**: Evaluates identity claims through RFC 8785 JSON Canonicalization Scheme (JCS) and prepends 16-byte cryptographically secure pseudorandom number generator (CSPRNG) salts to generate tamper-evident SHA3-256 commitments (`POST /api/hash`).
+2. **Gateway API Proxy**: Transparently proxies authenticated credential issuance (`POST /api/issue`) and cryptographic verification requests (`POST /api/verify`) to the core verification gateway without persisting raw claims to disk.
+3. **Health & Connectivity Probes**: Validates end-to-end network connectivity to the upstream verification gateway and the Hyperledger Fabric ledger (`GET /api/health`, `GET /healthz`).
+4. **Standard Claim Presets**: Exposes verified claim presets across KYC, Healthcare, FinTech, and Higher Education domains (`GET /api/presets`).
 
----
-
-## Key Modules & Interactive Story
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        SCATTERID.APP EXPERIENCE                        │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│  [1] HOLDER STUDIO (Issuance)                                          │
-│      • Real-world identity presets (Digital Passport, Driver's License) │
-│      • Local client-side canonicalization (RFC 8785 JCS) + CSPRNG salt  │
-│      • Transmits ONLY a SHA3-256 commitment to the network             │
-│      • Produces a quantum-signed digital credential (ML-DSA-65)        │
-│                                                                        │
-│  [2] VERIFIER PORTAL (Zero-Knowledge Verification)                     │
-│      • Mathematical proof verification without plaintext exposure       │
-│      • Selective disclosure (e.g., verify "Age ≥ 21" without DOB)       │
-│      • Standalone offline validation capability                         │
-│                                                                        │
-│  [3] QUANTUM ATTACK & TAMPER SIMULATOR                                 │
-│      • Live interactive adversary simulation                           │
-│      • Tamper with 1 bit of claim data or signature                     │
-│      • Instant cryptographic rejection: demonstrates unforgeability     │
-│                                                                        │
-│  [4] INFRASTRUCTURE TELEMETRY                                          │
-│      • Real-time Hyperledger Fabric ledger height & consensus           │
-│      • HashiCorp Vault KMS active key ID & mTLS telemetry               │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘
-```
+> [!NOTE]
+> **Headless Architecture & UI Redesign**: The legacy proof-of-concept client portal (`public/*`) was decommissioned to separate client UI presentation from cryptographic proxy operations. The service currently runs in headless API mode while a unified holder workbench is redesigned from scratch.
 
 ---
 
-## Tech Stack
+## 2. API Reference
 
-* **Frontend:** Modern Responsive SPA (Semantic HTML5 / Tailwind CSS / Vanilla ES Modules)
-* **Backend Bridge:** Node.js / Express proxying to ScatterID Gateway API (`:3000`)
-* **Cryptography:** NIST FIPS 204 ML-DSA-65 + SHA3-256 + RFC 8785 Canonicalization
-* **Ledger:** Hyperledger Fabric v2.5 with Raft consensus
+### Health Probes
+- **`GET /healthz`**: Basic liveness probe returning HTTP 200 with service uptime.
+- **`GET /api/health`**: Upstream readiness probe that queries the verification gateway (`/health`) and checks Fabric ledger connectivity.
+
+### Identity Claim Presets
+- **`GET /api/presets`**: Returns standard claim schemas and sample presets for demonstration workflows (`kyc`, `employment`, `healthcare`, `education`).
+
+### Cryptographic Salt & Commitment Generation
+- **`POST /api/hash`**
+  - **Payload**: `{ "claims": { [key: string]: any }, "salt"?: string }`
+  - **Operation**:
+    - If `salt` is not supplied, generates a 16-byte hex CSPRNG salt via `crypto.randomBytes(16)`.
+    - Canonicalizes each claim key-value pair per RFC 8785.
+    - Computes `SHA3-256(salt + canonical_claim)` for each claim to generate leaf commitments.
+  - **Response**: `{ "salt": "<32-char hex>", "saltedClaims": { ... }, "claimHashes": { ... } }`
+
+### Credential Issuance Proxy
+- **`POST /api/issue`**
+  - Proxies issuance requests to `${SCATTERID_GATEWAY_URL}/credentials/issue`.
+  - Expects standard credential attributes and holder binding key.
+
+### Credential Verification Proxy
+- **`POST /api/verify`**
+  - Proxies verification requests to `${SCATTERID_GATEWAY_URL}/credentials/verify`.
+  - Verifies post-quantum signature and active ledger revocation status.
 
 ---
 
-## Quickstart (Local Development)
+## 3. Configuration & Environment Variables
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `PORT` | `3001` | HTTP port on which the proxy listens |
+| `SCATTERID_GATEWAY_URL` | `http://localhost:3000` | Base URL of the core Verification Gateway API |
+| `NODE_ENV` | `development` | Runtime environment (`development`, `production`, `test`) |
+
+---
+
+## 4. Automated Testing & Verification
+
+The service includes an automated unit test suite using Node.js's native test runner (`node --test`), verifying route handling, error branches, canonical hashing, and salting behavior without external mock libraries:
 
 ```bash
-# 1. Clone the repository
-git clone git@github.com:0x4rc4n3/ScatterID-app.git
-cd ScatterID-app
+# Run the test suite
+npm test
+```
 
-# 2. Install dependencies
+### Test Coverage Highlights
+- **Health Probes**: Validates `/healthz` structure and status.
+- **Claim Presets**: Verifies schema integrity for KYC, healthcare, and education presets.
+- **Canonical Hashing**: Confirms deterministic SHA3-256 output across arbitrary key ordering.
+- **CSPRNG Salting**: Validates salt uniqueness and 16-byte entropy.
+- **Input Validation**: Confirms HTTP 400 rejection for malformed or missing claim payloads.
+
+---
+
+## 5. Development & Local Run
+
+```bash
+# Install dependencies
 npm install
 
-# 3. Start local development server
+# Start local proxy server (defaults to port 3001)
 npm run dev
+
+# Run automated tests
+npm test
 ```
 
 ---
 
-## Related Repositories
+## License
 
-* [ScatterID Core Infrastructure](https://github.com/0x4rc4n3/ScatterID): The core blockchain ledger, HashiCorp Vault KMS, and ML-DSA-65 cryptographic microservice.
+PolyForm Noncommercial License 1.0.0 © ScatterID Security Research.
