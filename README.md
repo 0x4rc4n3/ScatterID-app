@@ -1,60 +1,33 @@
-# ScatterID App — Post-Quantum Identity Portal
+# ScatterID App — Gateway Proxy & Demonstration Service
 
-[![Live Demo](https://img.shields.io/badge/Demo-scatterid.app-00F5A0.svg)](https://scatterid.app)
 [![Cryptography](https://img.shields.io/badge/Crypto-NIST_FIPS_204_(ML--DSA--65)-blue.svg)](https://csrc.nist.gov/pubs/fips/204/final)
 [![Ledger](https://img.shields.io/badge/Ledger-Hyperledger_Fabric-purple.svg)](https://www.hyperledger.org/projects/fabric)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0.0-blue.svg)](LICENSE)
 
-The official web application and demonstration portal for **ScatterID** — decentralized, zero-knowledge identity verification infrastructure built for the post-quantum era.
+Backend service and application proxy for **ScatterID** — decentralized, zero-knowledge identity verification infrastructure built for the post-quantum era.
 
 ---
 
-## Overview
+## Architecture & Service Scope
 
-**ScatterID App** delivers an interactive, high-fidelity user experience to demonstrate quantum-safe, privacy-preserving digital credentials. It directly interfaces with the ScatterID Verification Gateway API, HashiCorp Vault KMS, and Hyperledger Fabric blockchain ledger.
+**ScatterID App** serves as the application-tier proxy and local cryptographic formatting engine interfacing with the core ScatterID Verification Gateway API (`:3000`):
 
-Unlike traditional digital identity systems that transmit raw personal data over the wire, ScatterID enforces strict data minimization: **raw attributes never leave the user's device**.
+1. **Client-Side Salting & Canonicalization**: Performs RFC 8785 JSON canonicalization Scheme (JCS) and prepends 16-byte CSPRNG salt to generate tamper-evident SHA3-256 commitments (`POST /api/hash`).
+2. **Gateway API Proxy**: Bridges client requests to the backend verification gateway for credential issuance (`POST /api/issue`) and verification (`POST /api/verify`).
+3. **Health & Connectivity Probes**: Validates upstream connectivity to the Verification Gateway and Hyperledger Fabric ledger (`GET /api/health`, `GET /healthz`).
+4. **Standard Claim Presets**: Exposes production-representative identity presets across KYC, Healthcare, FinTech, and Higher Education (`GET /api/presets`).
 
----
-
-## Key Modules & Interactive Story
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        SCATTERID.APP EXPERIENCE                        │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│  [1] HOLDER STUDIO (Issuance)                                          │
-│      • Real-world identity presets (Digital Passport, Driver's License) │
-│      • Local client-side canonicalization (RFC 8785 JCS) + CSPRNG salt  │
-│      • Transmits ONLY a SHA3-256 commitment to the network             │
-│      • Produces a quantum-signed digital credential (ML-DSA-65)        │
-│                                                                        │
-│  [2] VERIFIER PORTAL (Zero-Knowledge Verification)                     │
-│      • Mathematical proof verification without plaintext exposure       │
-│      • Selective disclosure (e.g., verify "Age ≥ 21" without DOB)       │
-│      • Standalone offline validation capability                         │
-│                                                                        │
-│  [3] QUANTUM ATTACK & TAMPER SIMULATOR                                 │
-│      • Live interactive adversary simulation                           │
-│      • Tamper with 1 bit of claim data or signature                     │
-│      • Instant cryptographic rejection: demonstrates unforgeability     │
-│                                                                        │
-│  [4] INFRASTRUCTURE TELEMETRY                                          │
-│      • Real-time Hyperledger Fabric ledger height & consensus           │
-│      • HashiCorp Vault KMS active key ID & mTLS telemetry               │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘
-```
+> [!NOTE]
+> **UI Redesign Notice**: The legacy proof-of-concept client portal (`public/*`) has been decommissioned as part of the ecosystem hardening audit to prepare for a clean, scratch redesign of the web application and holder workbench.
 
 ---
 
 ## Tech Stack
 
-* **Frontend:** Modern Responsive SPA (Semantic HTML5 / Tailwind CSS / Vanilla ES Modules)
-* **Backend Bridge:** Node.js / Express proxying to ScatterID Gateway API (`:3000`)
-* **Cryptography:** NIST FIPS 204 ML-DSA-65 + SHA3-256 + RFC 8785 Canonicalization
-* **Ledger:** Hyperledger Fabric v2.5 with Raft consensus
+* **Runtime:** Node.js 24.x / Express 4.x (ES Modules)
+* **Security:** Helmet CSP headers + response compression
+* **Cryptography:** NIST FIPS 204 ML-DSA-65 + FIPS 202 SHA3-256 + RFC 8785 Canonicalization
+* **Test Harness:** Node.js native test runner (`node --test`)
 
 ---
 

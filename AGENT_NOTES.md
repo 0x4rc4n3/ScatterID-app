@@ -26,3 +26,13 @@
   - `server.js`
   - `test/server.test.js`
   - `AGENT_NOTES.md`
+
+## [2026-09-05] — Align README with decommissioned UI state
+- Scope: Project documentation (`README.md`).
+- Fix:
+  - Removed outdated live demo badges and SPA diagrams describing decommissioned UI.
+  - Formally documented the service as an Express API proxy, canonical hashing engine, and test harness.
+  - Added explicit notice that UI is undergoing clean ground-up redesign.
+- Files touched:
+  - `README.md`
+  - `AGENT_NOTES.md`
