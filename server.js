@@ -30,8 +30,6 @@ app.use(helmet({
 app.use(compression());
 app.use(express.json({ limit: '2mb' }));
 
-// Serve static assets from public/
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Health check endpoint for Docker / reverse proxy
 app.get('/healthz', (req, res) => {
@@ -245,7 +243,7 @@ app.post('/api/verify', async (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`========================================================`);
-  console.log(`  ScatterID Showcase Portal running at http://0.0.0.0:${PORT}`);
+  console.log(`  ScatterID App Service running at http://0.0.0.0:${PORT}`);
   console.log(`  Gateway API Target: ${GATEWAY_URL}`);
   console.log(`========================================================`);
 });
