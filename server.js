@@ -268,6 +268,27 @@ app.post('/api/portal/login', async (req, res) => {
   }
 });
 
+// Help Desk First-Time Setup Proxy
+app.post('/api/portal/first-time-setup', async (req, res) => {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (req.headers.authorization) headers['Authorization'] = req.headers.authorization;
+
+    const response = await fetch(`${OPS_DASHBOARD_URL}/api/auth/first-time-setup`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(502).json({
+      error: `Failed to complete first-time setup: ${err.message}`,
+      opsDashboardUrl: OPS_DASHBOARD_URL
+    });
+  }
+});
+
 // Help Desk Issue Intake Proxy
 app.post('/api/portal/issue', async (req, res) => {
   try {

@@ -8,6 +8,7 @@
     :root {
       --primary: #0284c7;
       --primary-hover: #0369a1;
+      --slate-950: #020617;
       --slate-900: #0f172a;
       --slate-800: #1e293b;
       --slate-700: #334155;
@@ -30,11 +31,14 @@
       background: var(--slate-50);
       color: var(--slate-900);
       line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     header {
       background: var(--slate-900);
       color: #fff;
-      padding: 16px 24px;
+      padding: 14px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -43,7 +47,7 @@
       border-bottom: 3px solid var(--primary);
     }
     .brand { display: flex; align-items: center; gap: 12px; }
-    .brand h1 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.5px; }
+    .brand h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
     .brand .badge {
       background: #0369a1;
       font-size: 11px;
@@ -51,16 +55,18 @@
       border-radius: 9999px;
       font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .station-bar { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+    .station-bar { display: flex; align-items: center; gap: 10px; font-size: 13px; }
     .station-pill {
       background: var(--slate-800);
       border: 1px solid var(--slate-700);
-      padding: 4px 12px;
+      padding: 5px 12px;
       border-radius: 6px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      font-size: 12.5px;
     }
     .dot {
       width: 8px;
@@ -70,7 +76,13 @@
       display: inline-block;
     }
     .dot.offline { background: #94a3b8; }
-    .container { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+    .container {
+      max-width: 1050px;
+      margin: 24px auto;
+      padding: 0 16px;
+      width: 100%;
+      flex: 1;
+    }
     .card {
       background: #fff;
       border: 1px solid var(--slate-200);
@@ -86,6 +98,9 @@
       border-bottom: 1px solid var(--slate-100);
       padding-bottom: 10px;
       margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .notice-box {
       padding: 12px 16px;
@@ -116,7 +131,8 @@
       box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
     }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
     .checklist-box {
       background: #f8fafc;
       border: 1px solid #cbd5e1;
@@ -187,6 +203,35 @@
       white-space: pre-wrap;
       word-break: break-all;
     }
+    .preview-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 14px;
+      margin: 16px 0;
+    }
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--slate-700);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .preview-code {
+      background: var(--slate-900);
+      color: #7dd3fc;
+      padding: 10px 12px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 0;
+    }
     .file-drop {
       border: 2px dashed #94a3b8;
       border-radius: 6px;
@@ -197,6 +242,32 @@
       margin-bottom: 12px;
     }
     .file-drop:hover { border-color: var(--primary); background: #f0f9ff; }
+    .codes-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .code-box {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 6px;
+      text-align: center;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 4px;
+    }
+    .empty-state {
+      padding: 32px 20px;
+      text-align: center;
+      color: var(--slate-600);
+      background: var(--slate-50);
+      border: 1px dashed var(--slate-200);
+      border-radius: 6px;
+      margin-top: 12px;
+    }
+    .empty-state .icon { font-size: 26px; color: var(--green-600); margin-bottom: 4px; }
   </style>
 </head>
 <body>
@@ -220,57 +291,121 @@
 
   <div class="container">
 
-    <!-- LOGIN PANEL (Visible when logged out) -->
-    <div id="loginCard" class="card">
-      <h2 class="card-title">Help Desk Terminal Authentication</h2>
+    <!-- SCREEN 1: LOGIN PANEL (Visible when logged out) -->
+    <div id="loginCard" class="card" style="max-width: 520px; margin: 30px auto;">
+      <h2 class="card-title">Help Desk Terminal Sign In</h2>
       <p style="font-size: 13px; color: var(--slate-600); margin-top: 0;">
-        Sign in to your assigned Help Desk counter station to unlock intake privileges.
+        Sign in to your assigned Help Desk counter station. First-time staff will be guided through mandatory password and MFA setup.
       </p>
 
-      <div class="grid-2">
-        <div class="form-group">
-          <label>Station Terminal ID</label>
-          <input type="text" id="stationInput" placeholder="e.g. STATION-DESK-01">
-        </div>
-        <div class="form-group">
-          <label>Staff Username</label>
-          <input type="text" id="clerkUserInput" placeholder="e.g. clerk_john">
-        </div>
+      <div class="form-group">
+        <label>Station Terminal ID</label>
+        <input type="text" id="stationInput" placeholder="e.g. STATION-DESK-01">
       </div>
 
       <div class="form-group">
-        <label>Staff Password</label>
-        <input type="password" id="clerkPassInput" placeholder="Enter password">
+        <label>Staff Username</label>
+        <input type="text" id="clerkUserInput" placeholder="e.g. clerk_john">
+      </div>
+
+      <div class="form-group">
+        <label>Staff Password / Temporary OTP</label>
+        <input type="password" id="clerkPassInput" placeholder="Enter password or temporary one-time pass">
+      </div>
+
+      <div id="loginMfaGroup" style="display:none;">
+        <div class="form-group">
+          <label>6-Digit Authenticator Code (TOTP)</label>
+          <input type="text" id="clerkTotpInput" placeholder="e.g. 123456">
+        </div>
       </div>
 
       <div style="display: flex; gap: 10px; align-items: center; margin-top: 18px;">
-        <button class="btn" onclick="handleClerkLogin()">Sign In to Intake Desk</button>
-        <span id="loginStatus" style="font-size: 12.5px; color: var(--slate-600);"></span>
+        <button class="btn" style="width: 100%;" onclick="handleClerkLogin()">Sign In to Intake Desk</button>
       </div>
+
+      <div id="loginStatus" style="font-size: 12.5px; margin-top: 10px; color: var(--slate-600);"></div>
 
       <div class="notice-box notice-info" style="margin-top: 20px; margin-bottom: 0;">
         <div>
-          <b>RBAC & Network Segregation:</b><br>
-          Clerk intake stations operate exclusively in Help Desk mode. Clerks cannot access the Moderation Queue or Root Execution console. (SEC-NET-07 / RFC-C1).
+          <b>Help Desk SOP (SEC-NET-07):</b><br>
+          Counter terminals operate strictly within Zone 1. All credential requests originate from authenticated clerk intake stations. Clerks cannot access the Moderation Queue or Root Execution console.
         </div>
       </div>
     </div>
 
-    <!-- MAIN DESK WORKBENCH (Hidden until authenticated) -->
+    <!-- SCREEN 2: FIRST-TIME SETUP & MFA ONBOARDING WIZARD -->
+    <div id="onboardingCard" class="card" style="max-width: 620px; margin: 24px auto; display: none;">
+      <h2 class="card-title">First-Time Security Onboarding</h2>
+
+      <div class="notice-box notice-auto">
+        <div>
+          <b>Temporary Password Detected:</b><br>
+          In accordance with security standards, you must configure a permanent password and enroll your mobile authenticator app (Google Authenticator, Authy, or 1Password) to activate this counter terminal.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>New Permanent Password (min 10 characters)</label>
+        <input type="password" id="newClerkPass" placeholder="Choose a strong permanent password">
+      </div>
+
+      <div class="form-group">
+        <label>Confirm Permanent Password</label>
+        <input type="password" id="confirmClerkPass" placeholder="Re-enter permanent password">
+      </div>
+
+      <div class="preview-box">
+        <div class="preview-header">
+          <span>Step 2: Scan TOTP Authenticator QR Code</span>
+        </div>
+        <div style="text-align: center; margin: 12px 0;">
+          <img id="clerkQrImg" src="" alt="TOTP QR Code" style="width: 180px; height: 180px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px; background: #fff;">
+          <div style="margin-top: 8px; font-size: 12px; color: var(--slate-600);">
+            Manual Secret Key: <code id="clerkSecretText" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:700;"></code>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px; margin-bottom: 0;">
+          <label>Enter 6-Digit Code from Authenticator App to Verify</label>
+          <input type="text" id="clerkVerifyTotp" placeholder="e.g. 123456" maxlength="6" style="letter-spacing: 2px; font-weight: 700; text-align: center; font-size: 16px;">
+        </div>
+      </div>
+
+      <button class="btn" style="width: 100%;" onclick="submitClerkFirstTimeSetup()">Complete Security Setup & Activate Account</button>
+
+      <!-- RECOVERY CODES REVEAL (Hidden until setup completes) -->
+      <div id="recoveryCodesSection" style="display:none; margin-top: 20px;">
+        <div class="notice-box notice-auto">
+          <div>
+            <b>✓ Account Activated Successfully!</b><br>
+            Please store your 8 Single-Use Emergency Recovery Codes in a safe offline location. Each code can be used once if you lose access to your authenticator device.
+          </div>
+        </div>
+
+        <div class="codes-grid" id="clerkRecoveryGrid"></div>
+
+        <button class="btn" style="width: 100%; margin-top: 12px;" onclick="finishClerkOnboarding()">Proceed to Counter Workbench →</button>
+      </div>
+
+      <pre id="onboardingError" class="result-box" style="display:none; margin-top: 14px;"></pre>
+    </div>
+
+    <!-- SCREEN 3: MAIN DESK WORKBENCH (Hidden until authenticated) -->
     <div id="workbenchCard" style="display:none;">
 
       <!-- RBAC STATUS BANNER -->
       <div class="notice-box notice-info">
         <div>
           <b>Help Desk Station Active:</b><br>
-          All requests submitted from this station carry an immutable attribution stamp (<code id="stampSummary"></code>).
+          Operating as authenticated counter staff (<code id="stampSummary"></code>). Form inputs are automatically sanitized into canonical RFC-8785 JSON claims and deterministic DIDs.
         </div>
       </div>
 
       <!-- TABS -->
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-hard')">⚡ Hard-Channel Issuance (Physical)</button>
-        <button class="tab-btn" onclick="switchTab('tab-soft')">📄 Soft-Channel Issuance (Digital Scan)</button>
+        <button class="tab-btn active" onclick="switchTab('tab-hard')">⚡ Hard-Channel (Physical Inspection)</button>
+        <button class="tab-btn" onclick="switchTab('tab-soft')">📄 Soft-Channel (Digital Scan)</button>
         <button class="tab-btn" onclick="switchTab('tab-revoke')">⛔ Revocation Intake</button>
         <button class="tab-btn" onclick="switchTab('tab-track')">🔍 Request Status Tracker</button>
         <button class="tab-btn" onclick="switchTab('tab-verify')">🛡️ Direct Gateway Verification</button>
@@ -288,26 +423,48 @@
           </div>
         </div>
 
-        <div class="grid-2">
+        <!-- HUMAN-CENTRIC FORM CHUNKS (NO MANUAL JSON OR DID) -->
+        <h3 style="font-size: 14px; margin: 16px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">1. Claimant Identity & Document Details</h3>
+        
+        <div class="grid-3">
           <div class="form-group">
-            <label>Claimant Legal Full Name</label>
-            <input type="text" id="hardName" placeholder="Enter legal full name">
+            <label>Legal First Name</label>
+            <input type="text" id="hardFirstName" placeholder="e.g. Alice" oninput="updateHardPreview()">
           </div>
           <div class="form-group">
-            <label>Physical Document Serial / Number</label>
-            <input type="text" id="hardDocNum" placeholder="e.g. PASSPORT-123456 or NAT-ID">
+            <label>Middle Name (Optional)</label>
+            <input type="text" id="hardMiddleName" placeholder="e.g. Marie" oninput="updateHardPreview()">
+          </div>
+          <div class="form-group">
+            <label>Legal Last Name</label>
+            <input type="text" id="hardLastName" placeholder="e.g. Smith" oninput="updateHardPreview()">
           </div>
         </div>
 
-        <div class="grid-2">
+        <div class="grid-3">
           <div class="form-group">
-            <label>Claimant Subject DID</label>
-            <input type="text" id="hardDid" placeholder="e.g. did:scatterid:claimant:alice">
+            <label>Date of Birth</label>
+            <input type="date" id="hardDob" oninput="updateHardPreview()">
           </div>
           <div class="form-group">
-            <label>Credential Type</label>
-            <select id="hardCredType">
+            <label>Issuing Country / Jurisdiction</label>
+            <select id="hardCountry" onchange="updateHardPreview()">
+              <option value="US">United States (US)</option>
+              <option value="CA">Canada (CA)</option>
+              <option value="GB">United Kingdom (GB)</option>
+              <option value="DE">Germany (DE)</option>
+              <option value="FR">France (FR)</option>
+              <option value="JP">Japan (JP)</option>
+              <option value="AU">Australia (AU)</option>
+              <option value="IN">India (IN)</option>
+              <option value="SG">Singapore (SG)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Credential Classification</label>
+            <select id="hardCredType" onchange="updateHardPreview()">
               <option value="NationalIdentityProof">National Identity Proof</option>
+              <option value="InternationalPassport">International Passport</option>
               <option value="DriverLicenseClearance">Driver License Clearance</option>
               <option value="HealthcareProfessionalLicense">Healthcare Professional License</option>
               <option value="CorporateEmploymentCredential">Corporate Employment Credential</option>
@@ -315,6 +472,30 @@
           </div>
         </div>
 
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Physical Document Serial / Number</label>
+            <input type="text" id="hardDocNum" placeholder="e.g. P9920148-X or NAT-ID" oninput="updateHardPreview()">
+          </div>
+          <div class="form-group">
+            <label>Document Expiration Date (Optional)</label>
+            <input type="date" id="hardExpDate" oninput="updateHardPreview()">
+          </div>
+        </div>
+
+        <!-- LIVE DETERMINISTIC PREVIEW BOX -->
+        <div class="preview-box">
+          <div class="preview-header">
+            <span>Deterministic DID & Canonical Claim Object (Live Generated)</span>
+            <span style="font-size:11px; color:var(--primary); text-transform:none; font-weight:600;">✓ Auto-compiled from chunks — No manual JSON editing</span>
+          </div>
+          <div style="margin-bottom: 8px; font-size: 12.5px;">
+            <b>Generated Subject DID:</b> <code id="hardDidPreview" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-family:monospace; color:#0369a1;">did:scatterid:user:pending...</code>
+          </div>
+          <pre class="preview-code" id="hardJsonPreview">// Complete claimant fields above to generate canonical RFC-8785 claim structure...</pre>
+        </div>
+
+        <!-- 4-POINT PHYSICAL INSPECTION CHECKLIST -->
         <div class="checklist-box">
           <label style="margin-bottom: 10px; font-weight:700;">Mandatory 4-Point Physical Checklist (Must personally verify all 4):</label>
           <label class="check-item"><input type="checkbox" id="hardChk1"> 1. Substrate & Material Integrity (Polycarbonate/security paper genuine, no delamination)</label>
@@ -339,25 +520,46 @@
           </div>
         </div>
 
-        <div class="grid-2">
+        <!-- HUMAN-CENTRIC FORM CHUNKS (NO MANUAL JSON OR DID) -->
+        <h3 style="font-size: 14px; margin: 16px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">1. Claimant Identity Details</h3>
+
+        <div class="grid-3">
           <div class="form-group">
-            <label>Claimant Legal Full Name</label>
-            <input type="text" id="softName" placeholder="Enter legal full name">
+            <label>Legal First Name</label>
+            <input type="text" id="softFirstName" placeholder="e.g. Benjamin" oninput="updateSoftPreview()">
           </div>
           <div class="form-group">
-            <label>Document Serial / Identifier</label>
-            <input type="text" id="softDocNum" placeholder="Enter document number">
+            <label>Middle Name (Optional)</label>
+            <input type="text" id="softMiddleName" placeholder="e.g. Thomas" oninput="updateSoftPreview()">
+          </div>
+          <div class="form-group">
+            <label>Legal Last Name</label>
+            <input type="text" id="softLastName" placeholder="e.g. Davis" oninput="updateSoftPreview()">
           </div>
         </div>
 
-        <div class="grid-2">
+        <div class="grid-3">
           <div class="form-group">
-            <label>Claimant Subject DID</label>
-            <input type="text" id="softDid" placeholder="e.g. did:scatterid:claimant:benjamin">
+            <label>Date of Birth</label>
+            <input type="date" id="softDob" oninput="updateSoftPreview()">
           </div>
           <div class="form-group">
-            <label>Credential Type</label>
-            <select id="softCredType">
+            <label>Issuing Country / Jurisdiction</label>
+            <select id="softCountry" onchange="updateSoftPreview()">
+              <option value="US">United States (US)</option>
+              <option value="CA">Canada (CA)</option>
+              <option value="GB">United Kingdom (GB)</option>
+              <option value="DE">Germany (DE)</option>
+              <option value="FR">France (FR)</option>
+              <option value="JP">Japan (JP)</option>
+              <option value="AU">Australia (AU)</option>
+              <option value="IN">India (IN)</option>
+              <option value="SG">Singapore (SG)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Credential Classification</label>
+            <select id="softCredType" onchange="updateSoftPreview()">
               <option value="NationalIdentityProof">National Identity Proof</option>
               <option value="CorporateEmploymentCredential">Corporate Employment Credential</option>
               <option value="AcademicDegreeCredential">Academic Degree Credential</option>
@@ -365,6 +567,19 @@
           </div>
         </div>
 
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Document Serial / Identifier</label>
+            <input type="text" id="softDocNum" placeholder="e.g. SCAN-DOC-5582" oninput="updateSoftPreview()">
+          </div>
+          <div class="form-group">
+            <label>Document Expiration Date (Optional)</label>
+            <input type="date" id="softExpDate" oninput="updateSoftPreview()">
+          </div>
+        </div>
+
+        <!-- DIGITAL SCAN UPLOAD -->
+        <h3 style="font-size: 14px; margin: 16px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">2. Digital Document Evidence</h3>
         <div class="form-group">
           <label>Document Scan / PDF File</label>
           <div class="file-drop" onclick="document.getElementById('softFileInput').click()">
@@ -373,6 +588,18 @@
           </div>
           <label>Calculated SHA-256 Digest (Client-Side Web Crypto)</label>
           <input type="text" id="softHashInput" placeholder="Select a file above to compute SHA-256 hash" readonly style="background:#f1f5f9; font-family:monospace;">
+        </div>
+
+        <!-- LIVE DETERMINISTIC PREVIEW BOX -->
+        <div class="preview-box">
+          <div class="preview-header">
+            <span>Deterministic DID & Canonical Claim Object (Live Generated)</span>
+            <span style="font-size:11px; color:var(--primary); text-transform:none; font-weight:600;">✓ Auto-compiled from chunks — No manual JSON editing</span>
+          </div>
+          <div style="margin-bottom: 8px; font-size: 12.5px;">
+            <b>Generated Subject DID:</b> <code id="softDidPreview" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-family:monospace; color:#0369a1;">did:scatterid:user:pending...</code>
+          </div>
+          <pre class="preview-code" id="softJsonPreview">// Complete claimant fields above to generate canonical RFC-8785 claim structure...</pre>
         </div>
 
         <button class="btn" onclick="submitSoftIssue()">Submit Soft-Channel Request</button>
@@ -393,7 +620,7 @@
 
         <div class="form-group">
           <label>Target Credential ID (UUID)</label>
-          <input type="text" id="revokeCredId" placeholder="Enter target credential UUID">
+          <input type="text" id="revokeCredId" placeholder="Enter target credential UUID (e.g. 550e8400-e29b-41d4-a716-446655440000)">
         </div>
 
         <div class="grid-2">
@@ -416,8 +643,8 @@
         </div>
 
         <div class="form-group">
-          <label>Intake Case Notes / Police Report Reference</label>
-          <input type="text" id="revokeNotes" placeholder="Enter case reference or incident notes">
+          <label>Intake Case Notes / Incident Reference</label>
+          <input type="text" id="revokeNotes" placeholder="Enter police report number, case file, or surrender context">
         </div>
 
         <button class="btn btn-danger" onclick="submitRevoke()">Submit Revocation Request</button>
@@ -427,20 +654,31 @@
       <!-- TAB 4: REQUEST STATUS TRACKER -->
       <div id="tab-track" class="tab-content card" style="display:none;">
         <h2 class="card-title">Claimant Request Status Tracker</h2>
-        <p style="font-size:13px; color:var(--slate-600);">Lookup the status of a submitted request by Request ID.</p>
+        <p style="font-size:13px; color:var(--slate-600); margin-top:0;">
+          Lookup the status of an intake request using its Request ID (e.g. <code>req_iss_...</code> or <code>req_rev_...</code>).
+        </p>
 
         <div style="display:flex; gap:10px; margin-bottom:16px;">
-          <input type="text" id="trackInput" placeholder="Paste Request ID (e.g. req_iss_...)">
+          <input type="text" id="trackInput" placeholder="Paste Request ID">
           <button class="btn" style="white-space:nowrap;" onclick="lookupTracking()">Query Status</button>
         </div>
 
-        <div id="trackResult" class="result-box" style="display:none;"></div>
+        <div id="trackResultContainer">
+          <div class="empty-state" id="trackEmptyState">
+            <div class="icon">🔍</div>
+            <b>No Query Performed</b>
+            <p>Enter a Request ID above to check its moderation and ledger execution status.</p>
+          </div>
+          <div id="trackResult" class="result-box" style="display:none;"></div>
+        </div>
       </div>
 
       <!-- TAB 5: DIRECT GATEWAY VERIFICATION -->
       <div id="tab-verify" class="tab-content card" style="display:none;">
         <h2 class="card-title">Direct Verification Console (Live Gateway Proxy)</h2>
-        <p style="font-size:13px; color:var(--slate-600);">Evaluates cryptographic validity directly against the Verification Gateway.</p>
+        <p style="font-size:13px; color:var(--slate-600); margin-top:0;">
+          Evaluates cryptographic validity directly against the Verification Gateway.
+        </p>
 
         <div class="form-group">
           <label>Credential ID (UUID) or SHA3-256 Data Hash</label>
@@ -459,7 +697,11 @@
     let clerkToken = '';
     let currentStation = '';
     let currentClerkUser = '';
+    let pendingTempToken = '';
+    let pendingMfaSecret = '';
+    let pendingRecoveryCodes = [];
 
+    // Switch active tab
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
@@ -471,26 +713,130 @@
       if (target) target.style.display = 'block';
     }
 
+    // Helper: Compute SHA-256 hex string from text
+    async function sha256Hex(str) {
+      const buffer = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Live update Hard-Channel preview
+    async function updateHardPreview() {
+      const first = document.getElementById('hardFirstName').value.trim();
+      const middle = document.getElementById('hardMiddleName').value.trim();
+      const last = document.getElementById('hardLastName').value.trim();
+      const dob = document.getElementById('hardDob').value;
+      const country = document.getElementById('hardCountry').value;
+      const credType = document.getElementById('hardCredType').value;
+      const docNum = document.getElementById('hardDocNum').value.trim().toUpperCase();
+      const expDate = document.getElementById('hardExpDate').value;
+
+      const fullName = [first, middle, last].filter(Boolean).join(' ');
+
+      if (!last && !docNum) {
+        document.getElementById('hardDidPreview').textContent = 'did:scatterid:user:pending...';
+        document.getElementById('hardJsonPreview').textContent = '// Complete claimant fields above to generate canonical RFC-8785 claim structure...';
+        return;
+      }
+
+      const seedStr = `${country}:${credType}:${docNum}:${dob}:${last.toLowerCase()}`;
+      const hash = await sha256Hex(seedStr);
+      const generatedDid = `did:scatterid:user:${hash.substring(0, 16)}`;
+
+      const claimObj = {
+        credentialType: credType,
+        subject: generatedDid,
+        claimant: {
+          firstName: first || undefined,
+          middleName: middle || undefined,
+          lastName: last || undefined,
+          fullName: fullName || undefined,
+          dateOfBirth: dob || undefined,
+          country: country,
+          documentType: credType,
+          documentNumber: docNum || undefined,
+          expiresAt: expDate || undefined
+        }
+      };
+
+      document.getElementById('hardDidPreview').textContent = generatedDid;
+      document.getElementById('hardJsonPreview').textContent = JSON.stringify(claimObj, null, 2);
+    }
+
+    // Live update Soft-Channel preview
+    async function updateSoftPreview() {
+      const first = document.getElementById('softFirstName').value.trim();
+      const middle = document.getElementById('softMiddleName').value.trim();
+      const last = document.getElementById('softLastName').value.trim();
+      const dob = document.getElementById('softDob').value;
+      const country = document.getElementById('softCountry').value;
+      const credType = document.getElementById('softCredType').value;
+      const docNum = document.getElementById('softDocNum').value.trim().toUpperCase();
+      const expDate = document.getElementById('softExpDate').value;
+
+      const fullName = [first, middle, last].filter(Boolean).join(' ');
+
+      if (!last && !docNum) {
+        document.getElementById('softDidPreview').textContent = 'did:scatterid:user:pending...';
+        document.getElementById('softJsonPreview').textContent = '// Complete claimant fields above to generate canonical RFC-8785 claim structure...';
+        return;
+      }
+
+      const seedStr = `${country}:${credType}:${docNum}:${dob}:${last.toLowerCase()}`;
+      const hash = await sha256Hex(seedStr);
+      const generatedDid = `did:scatterid:user:${hash.substring(0, 16)}`;
+
+      const claimObj = {
+        credentialType: credType,
+        subject: generatedDid,
+        claimant: {
+          firstName: first || undefined,
+          middleName: middle || undefined,
+          lastName: last || undefined,
+          fullName: fullName || undefined,
+          dateOfBirth: dob || undefined,
+          country: country,
+          documentType: credType,
+          documentNumber: docNum || undefined,
+          expiresAt: expDate || undefined
+        }
+      };
+
+      document.getElementById('softDidPreview').textContent = generatedDid;
+      document.getElementById('softJsonPreview').textContent = JSON.stringify(claimObj, null, 2);
+    }
+
+    // Handle Staff Login
     async function handleClerkLogin() {
       const username = document.getElementById('clerkUserInput').value.trim();
       const password = document.getElementById('clerkPassInput').value.trim();
       const station = document.getElementById('stationInput').value.trim() || 'STATION-DESK-01';
+      const totpCode = document.getElementById('clerkTotpInput') ? document.getElementById('clerkTotpInput').value.trim() : '';
 
       if (!username || !password) {
-        alert('Please enter both username and password.');
+        alert('Please enter staff username and password.');
         return;
       }
 
       const statusEl = document.getElementById('loginStatus');
-      statusEl.textContent = 'Authenticating...';
+      statusEl.textContent = 'Authenticating station credentials...';
 
       try {
+        const payload = { username, password };
+        if (totpCode) payload.totp_code = totpCode;
+
         const res = await fetch('/api/portal/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
+
+        if (res.status === 401 && data.mfaRequired) {
+          statusEl.textContent = 'Enter 6-digit TOTP authenticator code.';
+          document.getElementById('loginMfaGroup').style.display = 'block';
+          return;
+        }
 
         if (!res.ok) {
           statusEl.textContent = '';
@@ -498,30 +844,123 @@
           return;
         }
 
+        // Case A: First-Time Setup Required
+        if (data.requireFirstTimeSetup) {
+          statusEl.textContent = '';
+          pendingTempToken = data.tempToken;
+          currentStation = station;
+          currentClerkUser = data.username;
+
+          // Populate onboarding wizard
+          if (data.mfaSetup) {
+            pendingMfaSecret = data.mfaSetup.secret;
+            pendingRecoveryCodes = data.mfaSetup.recoveryCodes || [];
+            document.getElementById('clerkQrImg').src = data.mfaSetup.qrCodeDataUrl;
+            document.getElementById('clerkSecretText').textContent = data.mfaSetup.secret;
+          }
+
+          document.getElementById('loginCard').style.display = 'none';
+          document.getElementById('onboardingCard').style.display = 'block';
+          return;
+        }
+
+        // Case B: Standard Login Success
         clerkToken = data.token;
         currentStation = station;
         currentClerkUser = data.user.username;
 
-        // Update header & UI state
-        document.getElementById('stationDot').classList.remove('offline');
-        document.getElementById('stationLabel').textContent = `Station: ${currentStation}`;
-        document.getElementById('userLabel').textContent = `Staff: ${currentClerkUser} (${data.user.role.toUpperCase()})`;
-        document.getElementById('btnSignOut').style.display = 'inline-block';
-        document.getElementById('stampSummary').textContent = `staff_user_id: ${data.user.id}, station_id: ${currentStation}`;
-
-        // Hide login card, reveal workbench
-        document.getElementById('loginCard').style.display = 'none';
-        document.getElementById('workbenchCard').style.display = 'block';
+        setupWorkbenchUI(data.user);
       } catch (err) {
         statusEl.textContent = '';
         alert('Could not connect to Ops Dashboard auth service: ' + err.message);
       }
     }
 
+    // Submit First-Time Setup
+    async function submitClerkFirstTimeSetup() {
+      const p1 = document.getElementById('newClerkPass').value.trim();
+      const p2 = document.getElementById('confirmClerkPass').value.trim();
+      const totpCode = document.getElementById('clerkVerifyTotp').value.trim();
+      const errEl = document.getElementById('onboardingError');
+      errEl.style.display = 'none';
+
+      if (!p1 || p1.length < 10) {
+        alert('Permanent password must be at least 10 characters long.');
+        return;
+      }
+      if (p1 !== p2) {
+        alert('Passwords do not match. Please verify.');
+        return;
+      }
+      if (!totpCode || totpCode.length !== 6) {
+        alert('Please enter the 6-digit code from your authenticator app.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/portal/first-time-setup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${pendingTempToken}`
+          },
+          body: JSON.stringify({
+            newPassword: p1,
+            totpCode,
+            totpSecret: pendingMfaSecret,
+            recoveryCodes: pendingRecoveryCodes
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          errEl.style.display = 'block';
+          errEl.textContent = 'Setup Error: ' + (data.message || data.error);
+          return;
+        }
+
+        // Onboarding complete! Save token and show recovery codes
+        clerkToken = data.token;
+        currentClerkUser = data.user.username;
+
+        const grid = document.getElementById('clerkRecoveryGrid');
+        grid.innerHTML = '';
+        pendingRecoveryCodes.forEach((code, idx) => {
+          const div = document.createElement('div');
+          div.className = 'code-box';
+          div.textContent = `${idx + 1}. ${code}`;
+          grid.appendChild(div);
+        });
+
+        document.getElementById('recoveryCodesSection').style.display = 'block';
+      } catch (err) {
+        errEl.style.display = 'block';
+        errEl.textContent = 'Connection Error: ' + err.message;
+      }
+    }
+
+    function finishClerkOnboarding() {
+      document.getElementById('onboardingCard').style.display = 'none';
+      setupWorkbenchUI({ username: currentClerkUser, role: 'clerk', id: 'clerk' });
+    }
+
+    function setupWorkbenchUI(user) {
+      document.getElementById('stationDot').classList.remove('offline');
+      document.getElementById('stationLabel').textContent = `Station: ${currentStation}`;
+      document.getElementById('userLabel').textContent = `Staff: ${user.username} (${user.role.toUpperCase()})`;
+      document.getElementById('btnSignOut').style.display = 'inline-block';
+      document.getElementById('stampSummary').textContent = `staff_user: ${user.username}, station_id: ${currentStation}`;
+
+      document.getElementById('loginCard').style.display = 'none';
+      document.getElementById('onboardingCard').style.display = 'none';
+      document.getElementById('workbenchCard').style.display = 'block';
+    }
+
     function handleClerkLogout() {
       clerkToken = '';
       currentClerkUser = '';
       currentStation = '';
+      pendingTempToken = '';
 
       document.getElementById('stationDot').classList.add('offline');
       document.getElementById('stationLabel').textContent = 'Station: Not Initialized';
@@ -530,6 +969,7 @@
 
       document.getElementById('loginCard').style.display = 'block';
       document.getElementById('workbenchCard').style.display = 'none';
+      document.getElementById('onboardingCard').style.display = 'none';
       document.getElementById('loginStatus').textContent = '';
       document.getElementById('clerkPassInput').value = '';
     }
@@ -568,21 +1008,37 @@
         return;
       }
 
-      const fullName = document.getElementById('hardName').value.trim();
-      const docNumber = document.getElementById('hardDocNum').value.trim();
-      if (!fullName || !docNumber) {
-        alert('Claimant name and document serial are required.');
+      const first = document.getElementById('hardFirstName').value.trim();
+      const last = document.getElementById('hardLastName').value.trim();
+      const docNumber = document.getElementById('hardDocNum').value.trim().toUpperCase();
+      const dob = document.getElementById('hardDob').value;
+      const country = document.getElementById('hardCountry').value;
+      const credType = document.getElementById('hardCredType').value;
+
+      if (!last || !docNumber) {
+        alert('Claimant Last Name and Document Serial are required.');
         return;
       }
 
+      const fullName = [first, document.getElementById('hardMiddleName').value.trim(), last].filter(Boolean).join(' ');
+      const seedStr = `${country}:${credType}:${docNumber}:${dob}:${last.toLowerCase()}`;
+      const hash = await sha256Hex(seedStr);
+      const subjectDid = `did:scatterid:user:${hash.substring(0, 16)}`;
+
+      const claimantData = {
+        fullName,
+        firstName: first,
+        lastName: last,
+        dateOfBirth: dob,
+        country,
+        documentNumber,
+        subjectDid,
+        credentialType: credType
+      };
+
       const payload = {
         submission_channel: 'hard',
-        claimant_data: {
-          fullName,
-          documentNumber: docNumber,
-          subjectDid: document.getElementById('hardDid').value.trim(),
-          credentialType: document.getElementById('hardCredType').value
-        },
+        claimant_data: claimantData,
         inspection_checklist: {
           substrate_material_integrity: c1,
           optical_security_features: c2,
@@ -593,7 +1049,7 @@
 
       const resultEl = document.getElementById('hardResult');
       resultEl.style.display = 'block';
-      resultEl.textContent = 'Submitting Hard-Channel request...';
+      resultEl.textContent = 'Submitting Hard-Channel request to Moderation Queue...';
 
       try {
         const res = await fetch('/api/portal/issue', {
@@ -609,12 +1065,16 @@
     }
 
     async function submitSoftIssue() {
-      const fullName = document.getElementById('softName').value.trim();
-      const docNumber = document.getElementById('softDocNum').value.trim();
+      const first = document.getElementById('softFirstName').value.trim();
+      const last = document.getElementById('softLastName').value.trim();
+      const docNumber = document.getElementById('softDocNum').value.trim().toUpperCase();
+      const dob = document.getElementById('softDob').value;
+      const country = document.getElementById('softCountry').value;
+      const credType = document.getElementById('softCredType').value;
       const evidenceHash = document.getElementById('softHashInput').value.trim();
 
-      if (!fullName || !docNumber) {
-        alert('Claimant name and document serial are required.');
+      if (!last || !docNumber) {
+        alert('Claimant Last Name and Document Serial are required.');
         return;
       }
       if (!evidenceHash || evidenceHash.length !== 64) {
@@ -625,21 +1085,32 @@
       const fileInput = document.getElementById('softFileInput');
       const filename = fileInput.files[0] ? fileInput.files[0].name : 'document_scan.pdf';
 
+      const fullName = [first, document.getElementById('softMiddleName').value.trim(), last].filter(Boolean).join(' ');
+      const seedStr = `${country}:${credType}:${docNumber}:${dob}:${last.toLowerCase()}`;
+      const hash = await sha256Hex(seedStr);
+      const subjectDid = `did:scatterid:user:${hash.substring(0, 16)}`;
+
+      const claimantData = {
+        fullName,
+        firstName: first,
+        lastName: last,
+        dateOfBirth: dob,
+        country,
+        documentNumber,
+        subjectDid,
+        credentialType: credType
+      };
+
       const payload = {
         submission_channel: 'soft',
-        claimant_data: {
-          fullName,
-          documentNumber: docNumber,
-          subjectDid: document.getElementById('softDid').value.trim(),
-          credentialType: document.getElementById('softCredType').value
-        },
+        claimant_data: claimantData,
         evidence_sha256: evidenceHash,
         evidence_payload_path: `/uploads/scans/${filename}`
       };
 
       const resultEl = document.getElementById('softResult');
       resultEl.style.display = 'block';
-      resultEl.textContent = 'Submitting Soft-Channel request...';
+      resultEl.textContent = 'Submitting Soft-Channel request to Moderation Queue...';
 
       try {
         const res = await fetch('/api/portal/issue', {
@@ -692,16 +1163,19 @@
       }
 
       const resultEl = document.getElementById('trackResult');
-      resultEl.style.display = 'block';
-      resultEl.textContent = 'Looking up status...';
+      const emptyEl = document.getElementById('trackEmptyState');
 
       try {
         const res = await fetch(`/api/portal/track/${encodeURIComponent(id)}`, {
           headers: getAuthHeaders()
         });
         const data = await res.json();
+        emptyEl.style.display = 'none';
+        resultEl.style.display = 'block';
         resultEl.textContent = JSON.stringify(data, null, 2);
       } catch (err) {
+        emptyEl.style.display = 'none';
+        resultEl.style.display = 'block';
         resultEl.textContent = 'Error: ' + err.message;
       }
     }
