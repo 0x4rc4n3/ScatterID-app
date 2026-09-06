@@ -9,65 +9,7 @@ import canonicalize from 'canonicalize';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
 const PORT = process.env.PORT || 5000;
-const GATEWAY_URL = process.env.GATEWAY_URL || process.env.VERIFICATION_API_URL || 'http://localhost:3000';
-const OPS_DASHBOARD_URL = process.env.OPS_DASHBOARD_URL || 'http://localhost:8080';
-const VERIFICATION_API_KEY = process.env.VERIFICATION_API_KEY || '';
-
-// Security and compression middleware
-app.use(helmet({
-  contentSecurityPolicy: false // Allow inline scripts for standalone offline HTML portal
-}));
-app.use(compression());
-app.use(express.json({ limit: '5mb' }));
-
-// Serve static Help Desk Client Portal
-app.use(express.static(path.resolve(__dirname, 'public')));
-
-// Health check endpoint for Docker / reverse proxy
-app.get('/healthz', (req, res) => {
-  res.json({
-    status: 'ok',
-    service: 'scatterid-app',
-    portalPort: PORT,
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Diagnostic probe checking upstream Gateway API & Ops Dashboard status
-app.get('/api/health', async (req, res) => {
-  let gwStatus = 'unreachable';
-  let opsStatus = 'unreachable';
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
-    const gwRes = await fetch(`${GATEWAY_URL}/healthz`, { signal: controller.signal });
-    clearTimeout(timeout);
-    gwStatus = gwRes.ok ? 'connected' : 'degraded';
-  } catch (err) {
-    gwStatus = 'unreachable';
-  }
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
-    const opsRes = await fetch(`${OPS_DASHBOARD_URL}/healthz`, { signal: controller.signal });
-    clearTimeout(timeout);
-    opsStatus = opsRes.ok ? 'connected' : 'degraded';
-  } catch (err) {
-    opsStatus = 'unreachable';
-  }
-
-  res.json({
-    portal: 'operational',
-    gateway: gwStatus,
-    gatewayUrl: GATEWAY_URL,
-    opsDashboard: opsStatus,
-    opsDashboardUrl: OPS_DASHBOARD_URL
-  });
-});
 
 // Production-representative ScatterID claim presets
 const SAMPLE_PRESETS = [
@@ -126,6 +68,66 @@ const SAMPLE_PRESETS = [
     }
   }
 ];
+
+function createPortalApp(options = {}) {
+  const app = express();
+  const GATEWAY_URL = options.gatewayUrl || process.env.GATEWAY_URL || process.env.VERIFICATION_API_URL || 'http://localhost:3000';
+  const OPS_DASHBOARD_URL = options.opsDashboardUrl || process.env.OPS_DASHBOARD_URL || 'http://localhost:8080';
+  const VERIFICATION_API_KEY = options.verificationApiKey || process.env.VERIFICATION_API_KEY || '';
+
+  // Security and compression middleware
+  app.use(helmet({
+    contentSecurityPolicy: false // Allow inline scripts for standalone offline HTML portal
+  }));
+  app.use(compression());
+  app.use(express.json({ limit: '5mb' }));
+
+  // Serve static Help Desk Client Portal
+  app.use(express.static(path.resolve(__dirname, 'public')));
+
+// Health check endpoint for Docker / reverse proxy
+app.get('/healthz', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'scatterid-app',
+    portalPort: PORT,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Diagnostic probe checking upstream Gateway API & Ops Dashboard status
+app.get('/api/health', async (req, res) => {
+  let gwStatus = 'unreachable';
+  let opsStatus = 'unreachable';
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const gwRes = await fetch(`${GATEWAY_URL}/healthz`, { signal: controller.signal });
+    clearTimeout(timeout);
+    gwStatus = gwRes.ok ? 'connected' : 'degraded';
+  } catch (err) {
+    gwStatus = 'unreachable';
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const opsRes = await fetch(`${OPS_DASHBOARD_URL}/healthz`, { signal: controller.signal });
+    clearTimeout(timeout);
+    opsStatus = opsRes.ok ? 'connected' : 'degraded';
+  } catch (err) {
+    opsStatus = 'unreachable';
+  }
+
+  res.json({
+    portal: 'operational',
+    gateway: gwStatus,
+    gatewayUrl: GATEWAY_URL,
+    opsDashboard: opsStatus,
+    opsDashboardUrl: OPS_DASHBOARD_URL
+  });
+});
 
 app.get('/api/presets', (req, res) => {
   res.json({ presets: SAMPLE_PRESETS });
@@ -406,6 +408,11 @@ app.get('/api/portal/me', async (req, res) => {
   }
 });
 
+  return app;
+}
+
+const app = createPortalApp();
+
 const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isDirectRun && process.env.NODE_ENV !== 'test') {
@@ -413,10 +420,11 @@ if (isDirectRun && process.env.NODE_ENV !== 'test') {
     console.log(`========================================================`);
     console.log(`  ScatterID Client Portal running at http://0.0.0.0:${PORT}`);
     console.log(`  Portal UI available at http://localhost:${PORT}/`);
-    console.log(`  Ops Dashboard Target: ${OPS_DASHBOARD_URL}`);
-    console.log(`  Verification Gateway: ${GATEWAY_URL}`);
+    console.log(`  Ops Dashboard Target: ${process.env.OPS_DASHBOARD_URL || 'http://localhost:8080'}`);
+    console.log(`  Verification Gateway: ${process.env.GATEWAY_URL || 'http://localhost:3000'}`);
     console.log(`========================================================`);
   });
 }
 
-export { app, SAMPLE_PRESETS };
+export { app, createPortalApp, SAMPLE_PRESETS };
+
