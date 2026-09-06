@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScatterID — Help Desk Client Portal (Zone 1 Counter)</title>
+  <title>ScatterID — HEC Degree Attestation System (Zone 1 Counter)</title>
   <style>
     :root {
       --primary: #0284c7;
@@ -27,7 +27,7 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--slate-50);
       color: var(--slate-900);
       line-height: 1.5;
@@ -102,6 +102,7 @@
       justify-content: space-between;
       align-items: center;
     }
+    .req { color: var(--red-600); font-weight: bold; margin-left: 2px; }
     .notice-box {
       padding: 12px 16px;
       border-radius: 6px;
@@ -129,6 +130,19 @@
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+    .pwd-wrapper { position: relative; }
+    .toggle-pwd {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 12px;
+      color: var(--primary);
+      cursor: pointer;
+      font-weight: 600;
     }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -164,6 +178,8 @@
       gap: 8px;
     }
     .btn:hover { background: var(--primary-hover); }
+    .btn-green { background: var(--green-600); }
+    .btn-green:hover { background: #15803d; }
     .btn-danger { background: var(--red-600); }
     .btn-danger:hover { background: #b91c1c; }
     .btn-secondary { background: var(--slate-600); }
@@ -190,19 +206,6 @@
     }
     .tab-btn:hover { color: var(--primary); }
     .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .result-box {
-      margin-top: 16px;
-      background: var(--slate-900);
-      color: #38bdf8;
-      padding: 14px;
-      border-radius: 6px;
-      font-family: monospace;
-      font-size: 12.5px;
-      max-height: 250px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
     .preview-box {
       background: #f8fafc;
       border: 1px solid #cbd5e1;
@@ -242,19 +245,30 @@
       margin-bottom: 12px;
     }
     .file-drop:hover { border-color: var(--primary); background: #f0f9ff; }
+    .submission-banner {
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      border-left: 5px solid var(--green-600);
+      padding: 16px;
+      border-radius: 6px;
+      margin: 16px 0;
+      color: #14532d;
+    }
+    .submission-banner h4 { margin: 0 0 6px 0; font-size: 15px; color: #166534; }
+    .submission-banner p { margin: 4px 0; font-size: 13px; }
     .codes-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
       margin: 12px 0;
     }
     .code-box {
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
-      padding: 6px;
+      padding: 8px;
       text-align: center;
       font-family: monospace;
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 700;
       border-radius: 4px;
     }
@@ -274,8 +288,8 @@
 
   <header>
     <div class="brand">
-      <h1>ScatterID Help Desk Portal</h1>
-      <span class="badge">Zone 1: Counter VPN</span>
+      <h1>ScatterID — HEC Degree Attestation System</h1>
+      <span class="badge">Zone 1: Counter Intake</span>
     </div>
     <div class="station-bar">
       <div class="station-pill">
@@ -292,35 +306,38 @@
   <div class="container">
 
     <!-- SCREEN 1: LOGIN PANEL (Visible when logged out) -->
-    <div id="loginCard" class="card" style="max-width: 520px; margin: 30px auto;">
-      <h2 class="card-title">Help Desk Terminal Sign In</h2>
+    <div id="loginCard" class="card" style="max-width: 500px; margin: 30px auto;">
+      <h2 class="card-title">HEC Help Desk Staff Sign In</h2>
       <p style="font-size: 13px; color: var(--slate-600); margin-top: 0;">
-        Sign in to your assigned Help Desk counter station. First-time staff will be guided through mandatory password and MFA setup.
+        Sign in to your assigned Regional Counter Terminal. Fields marked with <span class="req">*</span> are required.
       </p>
 
       <div class="form-group">
-        <label>Station Terminal ID</label>
-        <input type="text" id="stationInput" placeholder="e.g. STATION-DESK-01">
+        <label>Station Terminal ID <span class="req">*</span></label>
+        <input type="text" id="stationInput" placeholder="e.g. HEC-ISB-DESK-01">
       </div>
 
       <div class="form-group">
-        <label>Staff Username</label>
+        <label>Staff Username <span class="req">*</span></label>
         <input type="text" id="clerkUserInput" placeholder="e.g. clerk_john">
       </div>
 
       <div class="form-group">
-        <label>Staff Password / Temporary OTP</label>
-        <input type="password" id="clerkPassInput" placeholder="Enter password or temporary one-time pass">
+        <label>Staff Password / Temporary OTP <span class="req">*</span></label>
+        <div class="pwd-wrapper">
+          <input type="password" id="clerkPassInput" placeholder="Enter temporary OTP or permanent password">
+          <button type="button" class="toggle-pwd" onclick="toggleField('clerkPassInput', this)">Show</button>
+        </div>
       </div>
 
       <div id="loginMfaGroup" style="display:none;">
         <div class="form-group">
           <label>6-Digit Authenticator Code (TOTP)</label>
-          <input type="text" id="clerkTotpInput" placeholder="e.g. 123456">
+          <input type="text" id="clerkTotpInput" placeholder="e.g. 123456" maxlength="6">
         </div>
       </div>
 
-      <div style="display: flex; gap: 10px; align-items: center; margin-top: 18px;">
+      <div style="margin-top: 18px;">
         <button class="btn" style="width: 100%;" onclick="handleClerkLogin()">Sign In to Intake Desk</button>
       </div>
 
@@ -329,337 +346,392 @@
       <div class="notice-box notice-info" style="margin-top: 20px; margin-bottom: 0;">
         <div>
           <b>Help Desk SOP (SEC-NET-07):</b><br>
-          Counter terminals operate strictly within Zone 1. All credential requests originate from authenticated clerk intake stations. Clerks cannot access the Moderation Queue or Root Execution console.
+          Regional HEC Counter staff intake original degree attestations in Zone 1. Clerks do not approve or anchor to the ledger directly; all submissions carry immutable staff attribution stamps to the Moderation Queue.
         </div>
       </div>
     </div>
 
     <!-- SCREEN 2: FIRST-TIME SETUP & MFA ONBOARDING WIZARD -->
-    <div id="onboardingCard" class="card" style="max-width: 620px; margin: 24px auto; display: none;">
-      <h2 class="card-title">First-Time Security Onboarding</h2>
+    <div id="onboardingCard" class="card" style="max-width: 600px; margin: 24px auto; display: none;">
+      
+      <!-- SUB-SCREEN 2A: PASSWORD (TWICE) & TOTP SCAN -->
+      <div id="onboardingFormSection">
+        <h2 class="card-title">Staff Onboarding & Security Setup</h2>
 
-      <div class="notice-box notice-auto">
-        <div>
-          <b>Temporary Password Detected:</b><br>
-          In accordance with security standards, you must configure a permanent password and enroll your mobile authenticator app (Google Authenticator, Authy, or 1Password) to activate this counter terminal.
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>New Permanent Password (min 10 characters)</label>
-        <input type="password" id="newClerkPass" placeholder="Choose a strong permanent password">
-      </div>
-
-      <div class="form-group">
-        <label>Confirm Permanent Password</label>
-        <input type="password" id="confirmClerkPass" placeholder="Re-enter permanent password">
-      </div>
-
-      <div class="preview-box">
-        <div class="preview-header">
-          <span>Step 2: Scan TOTP Authenticator QR Code</span>
-        </div>
-        <div style="text-align: center; margin: 12px 0;">
-          <img id="clerkQrImg" src="" alt="TOTP QR Code" style="width: 180px; height: 180px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px; background: #fff;">
-          <div style="margin-top: 8px; font-size: 12px; color: var(--slate-600);">
-            Manual Secret Key: <code id="clerkSecretText" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:700;"></code>
-          </div>
-        </div>
-
-        <div class="form-group" style="margin-top: 12px; margin-bottom: 0;">
-          <label>Enter 6-Digit Code from Authenticator App to Verify</label>
-          <input type="text" id="clerkVerifyTotp" placeholder="e.g. 123456" maxlength="6" style="letter-spacing: 2px; font-weight: 700; text-align: center; font-size: 16px;">
-        </div>
-      </div>
-
-      <button class="btn" style="width: 100%;" onclick="submitClerkFirstTimeSetup()">Complete Security Setup & Activate Account</button>
-
-      <!-- RECOVERY CODES REVEAL (Hidden until setup completes) -->
-      <div id="recoveryCodesSection" style="display:none; margin-top: 20px;">
         <div class="notice-box notice-auto">
           <div>
-            <b>✓ Account Activated Successfully!</b><br>
-            Please store your 8 Single-Use Emergency Recovery Codes in a safe offline location. Each code can be used once if you lose access to your authenticator device.
+            <b>Temporary One-Time Password Detected:</b><br>
+            Please set your new permanent password twice (to prevent typos) and enroll your mobile authenticator app.
           </div>
         </div>
 
-        <div class="codes-grid" id="clerkRecoveryGrid"></div>
+        <div id="onboardingError" class="notice-box notice-revoke" style="display:none;"></div>
 
-        <button class="btn" style="width: 100%; margin-top: 12px;" onclick="finishClerkOnboarding()">Proceed to Counter Workbench →</button>
+        <div class="form-group">
+          <label>1. New Permanent Password (min 10 chars) <span class="req">*</span></label>
+          <div class="pwd-wrapper">
+            <input type="password" id="newClerkPass" placeholder="Choose a strong permanent password">
+            <button type="button" class="toggle-pwd" onclick="toggleField('newClerkPass', this)">Show</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>2. Confirm Permanent Password <span class="req">*</span></label>
+          <div class="pwd-wrapper">
+            <input type="password" id="confirmClerkPass" placeholder="Re-enter permanent password to verify">
+            <button type="button" class="toggle-pwd" onclick="toggleField('confirmClerkPass', this)">Show</button>
+          </div>
+          <span id="clerkPassMatchNotice" style="font-size:12px; display:block; margin-top:4px;"></span>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-header">
+            <span>3. Scan TOTP Authenticator QR Code</span>
+          </div>
+          <div style="text-align: center; margin: 12px 0;">
+            <img id="clerkQrImg" src="" alt="TOTP QR Code" style="width: 170px; height: 170px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px; background: #fff;">
+            <div style="margin-top: 8px; font-size: 12px; color: var(--slate-600);">
+              Manual Secret Key: <code id="clerkSecretText" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:700;"></code>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 12px; margin-bottom: 0;">
+            <label>4. Enter 6-Digit Code from Authenticator App to Verify <span class="req">*</span></label>
+            <input type="text" id="clerkVerifyTotp" placeholder="e.g. 123456" maxlength="6" style="letter-spacing: 2px; font-weight: 700; text-align: center; font-size: 16px;">
+          </div>
+        </div>
+
+        <button class="btn" id="btnSubmitOnboard" style="width: 100%;" onclick="submitClerkFirstTimeSetup()">Complete Security Setup & Activate Account</button>
       </div>
 
-      <pre id="onboardingError" class="result-box" style="display:none; margin-top: 14px;"></pre>
+      <!-- SUB-SCREEN 2B: RECOVERY CODES REVEAL (SHOWN ONLY AFTER SUCCESSFUL ACTIVATION) -->
+      <div id="recoveryCodesSection" style="display:none;">
+        <h2 class="card-title" style="color:var(--green-600);">✓ Account Activated Successfully!</h2>
+
+        <div class="notice-box notice-auto">
+          <div>
+            <b>Password and Multi-Factor Authentication are now active.</b><br>
+            Please save your <b>8 Single-Use Emergency Recovery Codes</b>. Each code can be used once if you ever lose your mobile authenticator device.
+          </div>
+        </div>
+
+        <label style="font-weight:700;">Your Emergency Recovery Codes:</label>
+        <div class="codes-grid" id="clerkRecoveryGrid"></div>
+
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button class="btn btn-secondary" onclick="copyClerkRecoveryCodes()">Copy All Codes to Clipboard</button>
+          <button class="btn btn-green" style="flex:1;" onclick="finishClerkOnboarding()">Proceed to HEC Attestation Workbench →</button>
+        </div>
+      </div>
+
     </div>
 
     <!-- SCREEN 3: MAIN DESK WORKBENCH (Hidden until authenticated) -->
     <div id="workbenchCard" style="display:none;">
 
+      <!-- PROMINENT SUBMISSION CONFIRMATION MESSAGE BANNER -->
+      <div id="globalSubmitMessage" class="submission-banner" style="display:none;"></div>
+
       <!-- RBAC STATUS BANNER -->
       <div class="notice-box notice-info">
         <div>
-          <b>Help Desk Station Active:</b><br>
-          Operating as authenticated counter staff (<code id="stampSummary"></code>). Form inputs are automatically sanitized into canonical RFC-8785 JSON claims and deterministic DIDs.
+          <b>HEC Regional Intake Station Active:</b><br>
+          Operating as counter officer (<code id="stampSummary"></code>). Form chunks are auto-sanitized into RFC-8785 canonical claim structures and deterministic post-quantum DIDs.
         </div>
       </div>
 
       <!-- TABS -->
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-hard')">⚡ Hard-Channel (Physical Inspection)</button>
-        <button class="tab-btn" onclick="switchTab('tab-soft')">📄 Soft-Channel (Digital Scan)</button>
-        <button class="tab-btn" onclick="switchTab('tab-revoke')">⛔ Revocation Intake</button>
-        <button class="tab-btn" onclick="switchTab('tab-track')">🔍 Request Status Tracker</button>
+        <button class="tab-btn active" onclick="switchTab('tab-hard')">⚡ Physical Counter Attestation (Hard-Channel)</button>
+        <button class="tab-btn" onclick="switchTab('tab-soft')">📄 Online E-Attestation (Soft-Channel)</button>
+        <button class="tab-btn" onclick="switchTab('tab-revoke')">⛔ Invalidate / Revoke Attestation</button>
+        <button class="tab-btn" onclick="switchTab('tab-track')">🔍 Status Tracker</button>
         <button class="tab-btn" onclick="switchTab('tab-verify')">🛡️ Direct Gateway Verification</button>
       </div>
 
-      <!-- TAB 1: HARD-CHANNEL ISSUANCE -->
+      <!-- TAB 1: HARD-CHANNEL ISSUANCE (HEC DEGREE ATTESTATION) -->
       <div id="tab-hard" class="tab-content card">
-        <h2 class="card-title">Help Desk Intake: Hard-Channel In-Person Issuance</h2>
+        <h2 class="card-title">HEC Regional Counter Intake: In-Person Physical Attestation</h2>
 
         <div class="notice-box notice-auto">
           <span style="font-size:18px;">⚡</span>
           <div>
-            <b>Scenario B Auto-Execution Rule:</b><br>
-            Hard-Channel requests are based on physical in-person document inspection. When a Moderator approves this request, the system <b>auto-executes immediately on Hyperledger Fabric</b> without Root intervention.
+            <b>Scenario B Auto-Execution Invariant:</b><br>
+            Hard-channel degree attestations are verified physically at the HEC regional counter. When the Regional Moderator approves this request, the system <b>auto-executes immediately on Hyperledger Fabric</b> without Root intervention.
           </div>
         </div>
 
-        <!-- HUMAN-CENTRIC FORM CHUNKS (NO MANUAL JSON OR DID) -->
-        <h3 style="font-size: 14px; margin: 16px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">1. Claimant Identity & Document Details</h3>
+        <!-- 1. GRADUATE IDENTITY SECTION -->
+        <h3 style="font-size: 13.5px; margin: 16px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">
+          1. Graduate / Applicant Identity
+        </h3>
         
         <div class="grid-3">
           <div class="form-group">
-            <label>Legal First Name</label>
-            <input type="text" id="hardFirstName" placeholder="e.g. Alice" oninput="updateHardPreview()">
+            <label>Graduate Legal First Name <span class="req">*</span></label>
+            <input type="text" id="hardFirstName" placeholder="e.g. Muhammad" oninput="updateHardPreview()">
           </div>
           <div class="form-group">
-            <label>Middle Name (Optional)</label>
-            <input type="text" id="hardMiddleName" placeholder="e.g. Marie" oninput="updateHardPreview()">
+            <label>Middle / Father's Name (Optional)</label>
+            <input type="text" id="hardMiddleName" placeholder="e.g. Tariq" oninput="updateHardPreview()">
           </div>
           <div class="form-group">
-            <label>Legal Last Name</label>
-            <input type="text" id="hardLastName" placeholder="e.g. Smith" oninput="updateHardPreview()">
+            <label>Graduate Legal Last Name <span class="req">*</span></label>
+            <input type="text" id="hardLastName" placeholder="e.g. Ali" oninput="updateHardPreview()">
           </div>
         </div>
 
         <div class="grid-3">
           <div class="form-group">
-            <label>Date of Birth</label>
+            <label>CNIC / NICOP / Passport No. <span class="req">*</span></label>
+            <input type="text" id="hardCnic" placeholder="e.g. 42101-1234567-1 or NAT-ID" oninput="updateHardPreview()">
+          </div>
+          <div class="form-group">
+            <label>Date of Birth <span class="req">*</span></label>
             <input type="date" id="hardDob" oninput="updateHardPreview()">
           </div>
           <div class="form-group">
-            <label>Issuing Country / Jurisdiction</label>
+            <label>Country of Residence <span class="req">*</span></label>
             <select id="hardCountry" onchange="updateHardPreview()">
+              <option value="PK">Pakistan (PK)</option>
+              <option value="AE">United Arab Emirates (AE)</option>
+              <option value="SA">Saudi Arabia (SA)</option>
+              <option value="GB">United Kingdom (GB)</option>
               <option value="US">United States (US)</option>
               <option value="CA">Canada (CA)</option>
-              <option value="GB">United Kingdom (GB)</option>
-              <option value="DE">Germany (DE)</option>
-              <option value="FR">France (FR)</option>
-              <option value="JP">Japan (JP)</option>
               <option value="AU">Australia (AU)</option>
-              <option value="IN">India (IN)</option>
-              <option value="SG">Singapore (SG)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 2. DEGREE & ACADEMIC CREDENTIALS SECTION -->
+        <h3 style="font-size: 13.5px; margin: 18px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">
+          2. Academic Degree Credentials
+        </h3>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label>Degree Program Level <span class="req">*</span></label>
+            <select id="hardDegLevel" onchange="updateHardPreview()">
+              <option value="Bachelor (16-Year Honours)">Bachelor (16-Year Honours)</option>
+              <option value="Master / MS / MPhil (18-Year)">Master / MS / MPhil (18-Year)</option>
+              <option value="Doctor of Philosophy (Ph.D.)">Doctor of Philosophy (Ph.D.)</option>
+              <option value="Associate Degree / Postgrad Diploma">Associate Degree / Postgrad Diploma</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Credential Classification</label>
-            <select id="hardCredType" onchange="updateHardPreview()">
-              <option value="NationalIdentityProof">National Identity Proof</option>
-              <option value="InternationalPassport">International Passport</option>
-              <option value="DriverLicenseClearance">Driver License Clearance</option>
-              <option value="HealthcareProfessionalLicense">Healthcare Professional License</option>
-              <option value="CorporateEmploymentCredential">Corporate Employment Credential</option>
-            </select>
+            <label>Degree Program Title <span class="req">*</span></label>
+            <input type="text" id="hardProgTitle" placeholder="e.g. BS Computer Science" oninput="updateHardPreview()">
+          </div>
+          <div class="form-group">
+            <label>Major / Discipline <span class="req">*</span></label>
+            <input type="text" id="hardMajor" placeholder="e.g. Computer Science & Software Engineering" oninput="updateHardPreview()">
           </div>
         </div>
 
         <div class="grid-2">
           <div class="form-group">
-            <label>Physical Document Serial / Number</label>
-            <input type="text" id="hardDocNum" placeholder="e.g. P9920148-X or NAT-ID" oninput="updateHardPreview()">
+            <label>Degree Awarding University / Institute <span class="req">*</span></label>
+            <select id="hardUnivSelect" onchange="handleHardUnivChange(this)">
+              <option value="National University of Sciences & Technology (NUST)">National University of Sciences & Technology (NUST)</option>
+              <option value="Quaid-i-Azam University (QAU), Islamabad">Quaid-i-Azam University (QAU), Islamabad</option>
+              <option value="FAST National University of Computer and Emerging Sciences">FAST National University of Computer and Emerging Sciences</option>
+              <option value="Lahore University of Management Sciences (LUMS)">Lahore University of Management Sciences (LUMS)</option>
+              <option value="University of the Punjab, Lahore">University of the Punjab, Lahore</option>
+              <option value="University of Engineering and Technology (UET), Lahore">University of Engineering and Technology (UET), Lahore</option>
+              <option value="COMSATS University Islamabad">COMSATS University Islamabad</option>
+              <option value="Aga Khan University, Karachi">Aga Khan University, Karachi</option>
+              <option value="Other Recognized University">Other Recognized University...</option>
+            </select>
+            <input type="text" id="hardCustomUniv" placeholder="Specify University name" style="display:none; margin-top:6px;" oninput="updateHardPreview()">
           </div>
           <div class="form-group">
-            <label>Document Expiration Date (Optional)</label>
-            <input type="date" id="hardExpDate" oninput="updateHardPreview()">
+            <label>University Roll / Registration No. <span class="req">*</span></label>
+            <input type="text" id="hardRegNum" placeholder="e.g. NUST-2020-CS-084" oninput="updateHardPreview()">
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label>Degree Parchment / Transcript Serial No. <span class="req">*</span></label>
+            <input type="text" id="hardDocNum" placeholder="e.g. HEC-DEG-984210" oninput="updateHardPreview()">
+          </div>
+          <div class="form-group">
+            <label>Year of Passing / Convocation <span class="req">*</span></label>
+            <input type="number" id="hardYear" placeholder="e.g. 2024" min="1947" max="2035" oninput="updateHardPreview()">
+          </div>
+          <div class="form-group">
+            <label>HEC Application / Challan Ref</label>
+            <input type="text" id="hardChallan" placeholder="e.g. HEC-ATT-2026-00412" oninput="updateHardPreview()">
           </div>
         </div>
 
         <!-- LIVE DETERMINISTIC PREVIEW BOX -->
         <div class="preview-box">
           <div class="preview-header">
-            <span>Deterministic DID & Canonical Claim Object (Live Generated)</span>
-            <span style="font-size:11px; color:var(--primary); text-transform:none; font-weight:600;">✓ Auto-compiled from chunks — No manual JSON editing</span>
+            <span>Deterministic Post-Quantum DID & Canonical HEC Claim Structure</span>
+            <span style="font-size:11px; color:var(--primary); text-transform:none; font-weight:600;">✓ Auto-compiled from input chunks — No manual JSON syntax needed</span>
           </div>
           <div style="margin-bottom: 8px; font-size: 12.5px;">
-            <b>Generated Subject DID:</b> <code id="hardDidPreview" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-family:monospace; color:#0369a1;">did:scatterid:user:pending...</code>
+            <b>Generated Subject DID:</b> <code id="hardDidPreview" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-family:monospace; color:#0369a1;">did:scatterid:hec:degree:pending...</code>
           </div>
-          <pre class="preview-code" id="hardJsonPreview">// Complete claimant fields above to generate canonical RFC-8785 claim structure...</pre>
+          <pre class="preview-code" id="hardJsonPreview">// Complete required fields above to view canonical RFC-8785 JSON representation...</pre>
         </div>
 
-        <!-- 4-POINT PHYSICAL INSPECTION CHECKLIST -->
+        <!-- 4-POINT PHYSICAL INSPECTION CHECKLIST (MANDATORY) -->
         <div class="checklist-box">
-          <label style="margin-bottom: 10px; font-weight:700;">Mandatory 4-Point Physical Checklist (Must personally verify all 4):</label>
-          <label class="check-item"><input type="checkbox" id="hardChk1"> 1. Substrate & Material Integrity (Polycarbonate/security paper genuine, no delamination)</label>
-          <label class="check-item"><input type="checkbox" id="hardChk2"> 2. Optical Security Features (Hologram foil, UV watermarks, and OVI confirmed under UV lamp)</label>
-          <label class="check-item"><input type="checkbox" id="hardChk3"> 3. Biometric Likeness Face Match (Claimant at desk visually matches ID photograph)</label>
-          <label class="check-item"><input type="checkbox" id="hardChk4"> 4. Authority Seal & Serial (Embossed stamp and serial sequence verified)</label>
+          <label style="margin-bottom: 10px; font-weight:700;">
+            Mandatory 4-Point Physical Checklist (All 4 must be verified in-person at counter) <span class="req">*</span>
+          </label>
+          <label class="check-item"><input type="checkbox" id="hardChk1"> <span class="req">*</span> 1. Original University Parchment & Security Watermarks Verified under UV Lamp (no scraping or tampering)</label>
+          <label class="check-item"><input type="checkbox" id="hardChk2"> <span class="req">*</span> 2. University Registrar Embossed Seal & Controller of Examinations Signatures Verified</label>
+          <label class="check-item"><input type="checkbox" id="hardChk3"> <span class="req">*</span> 3. Applicant Physical Identity Verified Against CNIC / Passport Photo (Face match sighted at counter)</label>
+          <label class="check-item"><input type="checkbox" id="hardChk4"> <span class="req">*</span> 4. Prior Educational Prerequisites (HSSC / Intermediate) Checked Against HEC Registry</label>
         </div>
 
-        <button class="btn" onclick="submitHardIssue()">Submit Hard-Channel Request</button>
-        <div id="hardResult" class="result-box" style="display:none;"></div>
+        <button class="btn btn-green" id="btnSubmitHard" onclick="submitHardIssue()">Submit Hard-Channel Attestation Request</button>
       </div>
 
-      <!-- TAB 2: SOFT-CHANNEL ISSUANCE -->
+      <!-- TAB 2: SOFT-CHANNEL ISSUANCE (ONLINE DIGITAL SCAN) -->
       <div id="tab-soft" class="tab-content card" style="display:none;">
-        <h2 class="card-title">Help Desk Intake: Soft-Channel Digital Scan Issuance</h2>
+        <h2 class="card-title">HEC Intake: Online E-Attestation (Digital Scan)</h2>
 
         <div class="notice-box notice-root">
           <span style="font-size:18px;">🔒</span>
           <div>
-            <b>Scenario B Root Escalation Rule:</b><br>
-            Digital scans carry synthetic forgery and deepfake risks. Soft-channel requests reviewed by a Moderator <b>strictly escalate to Root Administrator authorization</b> before ledger anchoring.
+            <b>Scenario B Root Escalation Invariant:</b><br>
+            Digital scans carry high forgery and deepfake risks. Soft-channel requests reviewed by the Moderator <b>strictly escalate to Root Administrator authorization</b> before ledger anchoring.
           </div>
         </div>
 
-        <!-- HUMAN-CENTRIC FORM CHUNKS (NO MANUAL JSON OR DID) -->
-        <h3 style="font-size: 14px; margin: 16px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">1. Claimant Identity Details</h3>
+        <h3 style="font-size: 13.5px; margin: 16px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">
+          1. Graduate & Degree Details
+        </h3>
 
         <div class="grid-3">
           <div class="form-group">
-            <label>Legal First Name</label>
-            <input type="text" id="softFirstName" placeholder="e.g. Benjamin" oninput="updateSoftPreview()">
+            <label>Graduate Legal First Name <span class="req">*</span></label>
+            <input type="text" id="softFirstName" placeholder="e.g. Fatima" oninput="updateSoftPreview()">
           </div>
           <div class="form-group">
-            <label>Middle Name (Optional)</label>
-            <input type="text" id="softMiddleName" placeholder="e.g. Thomas" oninput="updateSoftPreview()">
+            <label>Middle / Father's Name (Optional)</label>
+            <input type="text" id="softMiddleName" placeholder="e.g. Zahra" oninput="updateSoftPreview()">
           </div>
           <div class="form-group">
-            <label>Legal Last Name</label>
-            <input type="text" id="softLastName" placeholder="e.g. Davis" oninput="updateSoftPreview()">
+            <label>Graduate Legal Last Name <span class="req">*</span></label>
+            <input type="text" id="softLastName" placeholder="e.g. Khan" oninput="updateSoftPreview()">
           </div>
         </div>
 
         <div class="grid-3">
           <div class="form-group">
-            <label>Date of Birth</label>
+            <label>CNIC / Passport No. <span class="req">*</span></label>
+            <input type="text" id="softCnic" placeholder="e.g. 61101-7654321-2" oninput="updateSoftPreview()">
+          </div>
+          <div class="form-group">
+            <label>Date of Birth <span class="req">*</span></label>
             <input type="date" id="softDob" oninput="updateSoftPreview()">
           </div>
           <div class="form-group">
-            <label>Issuing Country / Jurisdiction</label>
-            <select id="softCountry" onchange="updateSoftPreview()">
-              <option value="US">United States (US)</option>
-              <option value="CA">Canada (CA)</option>
-              <option value="GB">United Kingdom (GB)</option>
-              <option value="DE">Germany (DE)</option>
-              <option value="FR">France (FR)</option>
-              <option value="JP">Japan (JP)</option>
-              <option value="AU">Australia (AU)</option>
-              <option value="IN">India (IN)</option>
-              <option value="SG">Singapore (SG)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Credential Classification</label>
-            <select id="softCredType" onchange="updateSoftPreview()">
-              <option value="NationalIdentityProof">National Identity Proof</option>
-              <option value="CorporateEmploymentCredential">Corporate Employment Credential</option>
-              <option value="AcademicDegreeCredential">Academic Degree Credential</option>
-            </select>
+            <label>Program Title <span class="req">*</span></label>
+            <input type="text" id="softProgTitle" placeholder="e.g. MS Electrical Engineering" oninput="updateSoftPreview()">
           </div>
         </div>
 
         <div class="grid-2">
           <div class="form-group">
-            <label>Document Serial / Identifier</label>
-            <input type="text" id="softDocNum" placeholder="e.g. SCAN-DOC-5582" oninput="updateSoftPreview()">
+            <label>Degree Awarding University <span class="req">*</span></label>
+            <input type="text" id="softUniv" placeholder="e.g. FAST National University, Islamabad" oninput="updateSoftPreview()">
           </div>
           <div class="form-group">
-            <label>Document Expiration Date (Optional)</label>
-            <input type="date" id="softExpDate" oninput="updateSoftPreview()">
+            <label>Degree Parchment / Serial No. <span class="req">*</span></label>
+            <input type="text" id="softDocNum" placeholder="e.g. HEC-SCAN-55912" oninput="updateSoftPreview()">
           </div>
         </div>
 
-        <!-- DIGITAL SCAN UPLOAD -->
-        <h3 style="font-size: 14px; margin: 16px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">2. Digital Document Evidence</h3>
+        <!-- DIGITAL EVIDENCE UPLOAD -->
+        <h3 style="font-size: 13.5px; margin: 18px 0 10px 0; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.5px;">
+          2. Scanned Degree Evidence & SHA-256 Digest
+        </h3>
+
         <div class="form-group">
-          <label>Document Scan / PDF File</label>
+          <label>Original Degree Scan / PDF <span class="req">*</span></label>
           <div class="file-drop" onclick="document.getElementById('softFileInput').click()">
-            <div id="fileDropText">📁 Click to Select File (PDF, PNG, JPG)</div>
+            <div id="fileDropText">📁 Click to Select Degree Scan File (PDF, PNG, JPG)</div>
             <input type="file" id="softFileInput" style="display:none;" onchange="handleSoftFileSelected(event)">
           </div>
-          <label>Calculated SHA-256 Digest (Client-Side Web Crypto)</label>
-          <input type="text" id="softHashInput" placeholder="Select a file above to compute SHA-256 hash" readonly style="background:#f1f5f9; font-family:monospace;">
+          <label>Calculated SHA-256 Digest (Client-Side Web Crypto) <span class="req">*</span></label>
+          <input type="text" id="softHashInput" placeholder="Select a file above to compute 64-character SHA-256 hash" readonly style="background:#f1f5f9; font-family:monospace;">
         </div>
 
         <!-- LIVE DETERMINISTIC PREVIEW BOX -->
         <div class="preview-box">
           <div class="preview-header">
-            <span>Deterministic DID & Canonical Claim Object (Live Generated)</span>
-            <span style="font-size:11px; color:var(--primary); text-transform:none; font-weight:600;">✓ Auto-compiled from chunks — No manual JSON editing</span>
+            <span>Deterministic Post-Quantum DID & Canonical Claim Structure</span>
+            <span style="font-size:11px; color:var(--primary); text-transform:none; font-weight:600;">✓ Auto-compiled from input chunks</span>
           </div>
           <div style="margin-bottom: 8px; font-size: 12.5px;">
-            <b>Generated Subject DID:</b> <code id="softDidPreview" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-family:monospace; color:#0369a1;">did:scatterid:user:pending...</code>
+            <b>Generated Subject DID:</b> <code id="softDidPreview" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-family:monospace; color:#0369a1;">did:scatterid:hec:degree:pending...</code>
           </div>
-          <pre class="preview-code" id="softJsonPreview">// Complete claimant fields above to generate canonical RFC-8785 claim structure...</pre>
+          <pre class="preview-code" id="softJsonPreview">// Complete required fields above to view canonical RFC-8785 JSON representation...</pre>
         </div>
 
-        <button class="btn" onclick="submitSoftIssue()">Submit Soft-Channel Request</button>
-        <div id="softResult" class="result-box" style="display:none;"></div>
+        <button class="btn btn-green" id="btnSubmitSoft" onclick="submitSoftIssue()">Submit Soft-Channel Attestation Request</button>
       </div>
 
       <!-- TAB 3: REVOCATION INTAKE -->
       <div id="tab-revoke" class="tab-content card" style="display:none;">
-        <h2 class="card-title">Help Desk Intake: Credential Revocation</h2>
+        <h2 class="card-title">HEC Intake: Attestation Invalidation / Revocation</h2>
 
         <div class="notice-box notice-revoke">
           <span style="font-size:18px;">🛑</span>
           <div>
             <b>Strict Root Execution Invariant:</b><br>
-            Revocations are irreversible ledger operations and <b>never auto-execute</b>. All revocations require Root Administrator execution.
+            Degree attestation revocations are irreversible ledger operations and <b>never auto-execute</b>. All revocations require Root Administrator authorization.
           </div>
         </div>
 
         <div class="form-group">
-          <label>Target Credential ID (UUID)</label>
+          <label>Target Attestation Credential ID (UUID) <span class="req">*</span></label>
           <input type="text" id="revokeCredId" placeholder="Enter target credential UUID (e.g. 550e8400-e29b-41d4-a716-446655440000)">
         </div>
 
         <div class="grid-2">
           <div class="form-group">
-            <label>Submission Channel</label>
+            <label>Submission Channel <span class="req">*</span></label>
             <select id="revokeChannel">
-              <option value="hard">Hard Channel (Physical Document Surrendered at Counter)</option>
-              <option value="soft">Soft Channel (Reported via Phone, Email, or Police Report)</option>
+              <option value="hard">Hard Channel (Physical Degree Parchment Confiscated at Counter)</option>
+              <option value="soft">Soft Channel (Reported via Official University / Court Order)</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Revocation Reason Code</label>
+            <label>Revocation Reason Code <span class="req">*</span></label>
             <select id="revokeReasonCode">
-              <option value="Physical credential reported lost or stolen">Physical credential reported lost or stolen</option>
-              <option value="Suspected identity compromise or fraud">Suspected identity compromise or fraud</option>
-              <option value="Voluntary credential relinquishment by holder">Voluntary credential relinquishment by holder</option>
-              <option value="Administrative lifecycle expiration">Administrative lifecycle expiration</option>
+              <option value="Forged or fraudulent university degree detected">Forged or fraudulent university degree detected</option>
+              <option value="Degree cancelled by awarding university syndicate">Degree cancelled by awarding university syndicate</option>
+              <option value="Plagiarism or academic misconduct conviction">Plagiarism or academic misconduct conviction</option>
+              <option value="Administrative replacement due to name/data correction">Administrative replacement due to name/data correction</option>
             </select>
           </div>
         </div>
 
         <div class="form-group">
-          <label>Intake Case Notes / Incident Reference</label>
-          <input type="text" id="revokeNotes" placeholder="Enter police report number, case file, or surrender context">
+          <label>HEC Inquiry Case / Official Notification Reference <span class="req">*</span></label>
+          <input type="text" id="revokeNotes" placeholder="Enter formal case inquiry number or university notification ref">
         </div>
 
-        <button class="btn btn-danger" onclick="submitRevoke()">Submit Revocation Request</button>
-        <div id="revokeResult" class="result-box" style="display:none;"></div>
+        <button class="btn btn-danger" onclick="submitRevoke()">Submit Revocation Request to Root Queue</button>
       </div>
 
       <!-- TAB 4: REQUEST STATUS TRACKER -->
       <div id="tab-track" class="tab-content card" style="display:none;">
-        <h2 class="card-title">Claimant Request Status Tracker</h2>
+        <h2 class="card-title">Attestation Request Status Tracker</h2>
         <p style="font-size:13px; color:var(--slate-600); margin-top:0;">
-          Lookup the status of an intake request using its Request ID (e.g. <code>req_iss_...</code> or <code>req_rev_...</code>).
+          Lookup the status of a degree attestation request using its Request ID (e.g. <code>req_iss_...</code> or <code>req_rev_...</code>).
         </p>
 
         <div style="display:flex; gap:10px; margin-bottom:16px;">
-          <input type="text" id="trackInput" placeholder="Paste Request ID">
+          <input type="text" id="trackInput" placeholder="Paste Request Tracking ID">
           <button class="btn" style="white-space:nowrap;" onclick="lookupTracking()">Query Status</button>
         </div>
 
@@ -669,24 +741,24 @@
             <b>No Query Performed</b>
             <p>Enter a Request ID above to check its moderation and ledger execution status.</p>
           </div>
-          <div id="trackResult" class="result-box" style="display:none;"></div>
+          <div id="trackResultBox" style="display:none; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:16px;"></div>
         </div>
       </div>
 
       <!-- TAB 5: DIRECT GATEWAY VERIFICATION -->
       <div id="tab-verify" class="tab-content card" style="display:none;">
-        <h2 class="card-title">Direct Verification Console (Live Gateway Proxy)</h2>
+        <h2 class="card-title">Direct Verification Console (Verification Gateway)</h2>
         <p style="font-size:13px; color:var(--slate-600); margin-top:0;">
-          Evaluates cryptographic validity directly against the Verification Gateway.
+          Verify post-quantum cryptographic proof directly against the Verification Gateway.
         </p>
 
         <div class="form-group">
-          <label>Credential ID (UUID) or SHA3-256 Data Hash</label>
+          <label>Credential ID (UUID) or SHA3-256 Data Hash <span class="req">*</span></label>
           <input type="text" id="verifyInput" placeholder="Enter UUID or 64-character hex hash">
         </div>
 
         <button class="btn" onclick="executeDirectVerify()">Run Cryptographic Verification</button>
-        <div id="verifyResult" class="result-box" style="display:none;"></div>
+        <div id="verifyResult" class="preview-box" style="display:none; margin-top:16px;"></div>
       </div>
 
     </div>
@@ -713,7 +785,27 @@
       if (target) target.style.display = 'block';
     }
 
-    // Helper: Compute SHA-256 hex string from text
+    function toggleField(id, btn) {
+      const el = document.getElementById(id);
+      if (el.type === 'password') {
+        el.type = 'text';
+        btn.textContent = 'Hide';
+      } else {
+        el.type = 'password';
+        btn.textContent = 'Show';
+      }
+    }
+
+    function handleHardUnivChange(sel) {
+      const customInp = document.getElementById('hardCustomUniv');
+      if (sel.value === 'Other Recognized University') {
+        customInp.style.display = 'block';
+      } else {
+        customInp.style.display = 'none';
+      }
+      updateHardPreview();
+    }
+
     async function sha256Hex(str) {
       const buffer = new TextEncoder().encode(str);
       const digest = await crypto.subtle.digest('SHA-256', buffer);
@@ -725,37 +817,57 @@
       const first = document.getElementById('hardFirstName').value.trim();
       const middle = document.getElementById('hardMiddleName').value.trim();
       const last = document.getElementById('hardLastName').value.trim();
+      const cnic = document.getElementById('hardCnic').value.trim();
       const dob = document.getElementById('hardDob').value;
       const country = document.getElementById('hardCountry').value;
-      const credType = document.getElementById('hardCredType').value;
+      const degLevel = document.getElementById('hardDegLevel').value;
+      const progTitle = document.getElementById('hardProgTitle').value.trim();
+      const major = document.getElementById('hardMajor').value.trim();
+      const univSel = document.getElementById('hardUnivSelect').value;
+      const univ = univSel === 'Other Recognized University' ? document.getElementById('hardCustomUniv').value.trim() : univSel;
+      const regNum = document.getElementById('hardRegNum').value.trim().toUpperCase();
       const docNum = document.getElementById('hardDocNum').value.trim().toUpperCase();
-      const expDate = document.getElementById('hardExpDate').value;
+      const year = document.getElementById('hardYear').value;
+      const challan = document.getElementById('hardChallan').value.trim();
 
       const fullName = [first, middle, last].filter(Boolean).join(' ');
 
-      if (!last && !docNum) {
-        document.getElementById('hardDidPreview').textContent = 'did:scatterid:user:pending...';
-        document.getElementById('hardJsonPreview').textContent = '// Complete claimant fields above to generate canonical RFC-8785 claim structure...';
+      if (!last && !cnic && !docNum) {
+        document.getElementById('hardDidPreview').textContent = 'did:scatterid:hec:degree:pending...';
+        document.getElementById('hardJsonPreview').textContent = '// Complete required fields above to view canonical RFC-8785 JSON representation...';
         return;
       }
 
-      const seedStr = `${country}:${credType}:${docNum}:${dob}:${last.toLowerCase()}`;
+      const seedStr = `${country}:HECDegree:${univ}:${regNum || docNum}:${cnic || last.toLowerCase()}`;
       const hash = await sha256Hex(seedStr);
-      const generatedDid = `did:scatterid:user:${hash.substring(0, 16)}`;
+      const generatedDid = `did:scatterid:hec:degree:${hash.substring(0, 16)}`;
 
       const claimObj = {
-        credentialType: credType,
+        credentialType: 'HECDegreeAttestationCredential',
         subject: generatedDid,
-        claimant: {
+        attestationAuthority: 'Higher Education Commission (HEC)',
+        graduate: {
           firstName: first || undefined,
-          middleName: middle || undefined,
           lastName: last || undefined,
           fullName: fullName || undefined,
+          cnic: cnic || undefined,
           dateOfBirth: dob || undefined,
-          country: country,
-          documentType: credType,
-          documentNumber: docNum || undefined,
-          expiresAt: expDate || undefined
+          country: country
+        },
+        degree: {
+          level: degLevel,
+          program: progTitle || undefined,
+          major: major || undefined,
+          institution: univ || undefined,
+          registrationNumber: regNum || undefined,
+          parchmentSerial: docNum || undefined,
+          passingYear: year ? parseInt(year, 10) : undefined,
+          challanReference: challan || undefined
+        },
+        attestation: {
+          channel: 'hard',
+          mode: 'In-Person Physical Counter Inspection',
+          status: 'ATTESTED'
         }
       };
 
@@ -768,37 +880,44 @@
       const first = document.getElementById('softFirstName').value.trim();
       const middle = document.getElementById('softMiddleName').value.trim();
       const last = document.getElementById('softLastName').value.trim();
+      const cnic = document.getElementById('softCnic').value.trim();
       const dob = document.getElementById('softDob').value;
-      const country = document.getElementById('softCountry').value;
-      const credType = document.getElementById('softCredType').value;
+      const progTitle = document.getElementById('softProgTitle').value.trim();
+      const univ = document.getElementById('softUniv').value.trim();
       const docNum = document.getElementById('softDocNum').value.trim().toUpperCase();
-      const expDate = document.getElementById('softExpDate').value;
 
       const fullName = [first, middle, last].filter(Boolean).join(' ');
 
-      if (!last && !docNum) {
-        document.getElementById('softDidPreview').textContent = 'did:scatterid:user:pending...';
-        document.getElementById('softJsonPreview').textContent = '// Complete claimant fields above to generate canonical RFC-8785 claim structure...';
+      if (!last && !cnic && !docNum) {
+        document.getElementById('softDidPreview').textContent = 'did:scatterid:hec:degree:pending...';
+        document.getElementById('softJsonPreview').textContent = '// Complete required fields above to view canonical RFC-8785 JSON representation...';
         return;
       }
 
-      const seedStr = `${country}:${credType}:${docNum}:${dob}:${last.toLowerCase()}`;
+      const seedStr = `PK:HECDegree:${univ}:${docNum}:${cnic || last.toLowerCase()}`;
       const hash = await sha256Hex(seedStr);
-      const generatedDid = `did:scatterid:user:${hash.substring(0, 16)}`;
+      const generatedDid = `did:scatterid:hec:degree:${hash.substring(0, 16)}`;
 
       const claimObj = {
-        credentialType: credType,
+        credentialType: 'HECDegreeAttestationCredential',
         subject: generatedDid,
-        claimant: {
+        attestationAuthority: 'Higher Education Commission (HEC)',
+        graduate: {
           firstName: first || undefined,
-          middleName: middle || undefined,
           lastName: last || undefined,
           fullName: fullName || undefined,
-          dateOfBirth: dob || undefined,
-          country: country,
-          documentType: credType,
-          documentNumber: docNum || undefined,
-          expiresAt: expDate || undefined
+          cnic: cnic || undefined,
+          dateOfBirth: dob || undefined
+        },
+        degree: {
+          program: progTitle || undefined,
+          institution: univ || undefined,
+          parchmentSerial: docNum || undefined
+        },
+        attestation: {
+          channel: 'soft',
+          mode: 'Online Digital Scan Upload',
+          status: 'PENDING_ROOT'
         }
       };
 
@@ -806,11 +925,11 @@
       document.getElementById('softJsonPreview').textContent = JSON.stringify(claimObj, null, 2);
     }
 
-    // Handle Staff Login
+    // Clerk Login
     async function handleClerkLogin() {
       const username = document.getElementById('clerkUserInput').value.trim();
       const password = document.getElementById('clerkPassInput').value.trim();
-      const station = document.getElementById('stationInput').value.trim() || 'STATION-DESK-01';
+      const station = document.getElementById('stationInput').value.trim() || 'HEC-ISB-DESK-01';
       const totpCode = document.getElementById('clerkTotpInput') ? document.getElementById('clerkTotpInput').value.trim() : '';
 
       if (!username || !password) {
@@ -819,7 +938,7 @@
       }
 
       const statusEl = document.getElementById('loginStatus');
-      statusEl.textContent = 'Authenticating station credentials...';
+      statusEl.textContent = 'Authenticating staff credentials...';
 
       try {
         const payload = { username, password };
@@ -833,7 +952,7 @@
         const data = await res.json();
 
         if (res.status === 401 && data.mfaRequired) {
-          statusEl.textContent = 'Enter 6-digit TOTP authenticator code.';
+          statusEl.textContent = 'MFA Required: Enter 6-digit TOTP code.';
           document.getElementById('loginMfaGroup').style.display = 'block';
           return;
         }
@@ -851,7 +970,6 @@
           currentStation = station;
           currentClerkUser = data.username;
 
-          // Populate onboarding wizard
           if (data.mfaSetup) {
             pendingMfaSecret = data.mfaSetup.secret;
             pendingRecoveryCodes = data.mfaSetup.recoveryCodes || [];
@@ -861,18 +979,34 @@
 
           document.getElementById('loginCard').style.display = 'none';
           document.getElementById('onboardingCard').style.display = 'block';
+          document.getElementById('onboardingFormSection').style.display = 'block';
+          document.getElementById('recoveryCodesSection').style.display = 'none';
+
+          // Set up matching listener
+          document.getElementById('confirmClerkPass').addEventListener('input', () => {
+            const p1 = document.getElementById('newClerkPass').value;
+            const p2 = document.getElementById('confirmClerkPass').value;
+            const n = document.getElementById('clerkPassMatchNotice');
+            if (!p2) { n.textContent = ''; return; }
+            if (p1 === p2) {
+              n.textContent = '✓ Passwords match';
+              n.style.color = 'var(--green-600)';
+            } else {
+              n.textContent = '✗ Passwords do not match';
+              n.style.color = 'var(--red-600)';
+            }
+          });
           return;
         }
 
-        // Case B: Standard Login Success
+        // Case B: Full Login Success
         clerkToken = data.token;
         currentStation = station;
         currentClerkUser = data.user.username;
-
         setupWorkbenchUI(data.user);
       } catch (err) {
         statusEl.textContent = '';
-        alert('Could not connect to Ops Dashboard auth service: ' + err.message);
+        alert('Could not connect to auth service: ' + err.message);
       }
     }
 
@@ -897,6 +1031,10 @@
         return;
       }
 
+      const btn = document.getElementById('btnSubmitOnboard');
+      btn.disabled = true;
+      btn.textContent = 'Verifying & Saving Password...';
+
       try {
         const res = await fetch('/api/portal/first-time-setup', {
           method: 'POST',
@@ -916,32 +1054,44 @@
         if (!res.ok) {
           errEl.style.display = 'block';
           errEl.textContent = 'Setup Error: ' + (data.message || data.error);
+          btn.disabled = false;
+          btn.textContent = 'Complete Security Setup & Activate Account';
           return;
         }
 
-        // Onboarding complete! Save token and show recovery codes
         clerkToken = data.token;
         currentClerkUser = data.user.username;
 
+        // POPULATE RECOVERY CODES ON SUCCESS
         const grid = document.getElementById('clerkRecoveryGrid');
         grid.innerHTML = '';
         pendingRecoveryCodes.forEach((code, idx) => {
           const div = document.createElement('div');
           div.className = 'code-box';
-          div.textContent = `${idx + 1}. ${code}`;
+          div.textContent = `[${idx + 1}] ${code}`;
           grid.appendChild(div);
         });
 
+        document.getElementById('onboardingFormSection').style.display = 'none';
         document.getElementById('recoveryCodesSection').style.display = 'block';
+
       } catch (err) {
         errEl.style.display = 'block';
         errEl.textContent = 'Connection Error: ' + err.message;
+        btn.disabled = false;
+        btn.textContent = 'Complete Security Setup & Activate Account';
       }
+    }
+
+    function copyClerkRecoveryCodes() {
+      if (pendingRecoveryCodes.length === 0) return;
+      navigator.clipboard.writeText(pendingRecoveryCodes.join('\n'));
+      alert('All 8 emergency recovery codes copied to clipboard! Save them offline.');
     }
 
     function finishClerkOnboarding() {
       document.getElementById('onboardingCard').style.display = 'none';
-      setupWorkbenchUI({ username: currentClerkUser, role: 'clerk', id: 'clerk' });
+      setupWorkbenchUI({ username: currentClerkUser, role: 'clerk' });
     }
 
     function setupWorkbenchUI(user) {
@@ -986,6 +1136,7 @@
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       
       document.getElementById('softHashInput').value = hashHex;
+      updateSoftPreview();
     }
 
     function getAuthHeaders() {
@@ -997,6 +1148,34 @@
       return headers;
     }
 
+    function showSubmitBanner(title, reqId, status, channel, candidateName) {
+      const banner = document.getElementById('globalSubmitMessage');
+      banner.style.display = 'block';
+      banner.innerHTML = `
+        <h4>✓ ${title}</h4>
+        <p><b>Request Tracking ID:</b> <code>${reqId}</code></p>
+        <p><b>Candidate / Graduate:</b> ${candidateName}</p>
+        <p><b>Status:</b> <span class="badge ${status === 'EXECUTED_ON_LEDGER' ? 'badge-hard':'badge-soft'}">${status}</span> &nbsp;|&nbsp; <b>Channel:</b> ${channel.toUpperCase()}</p>
+        <p><b>Attribution Stamp:</b> ${currentClerkUser} @ ${currentStation}</p>
+        <div style="margin-top:10px;">
+          <button class="btn small" onclick="copyTrackingId('${reqId}')">Copy Request ID</button>
+          <button class="btn small btn-secondary" onclick="openTrackingFor('${reqId}')">Track Status →</button>
+        </div>
+      `;
+      banner.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyTrackingId(id) {
+      navigator.clipboard.writeText(id);
+      alert('Tracking ID copied: ' + id);
+    }
+
+    function openTrackingFor(id) {
+      switchTab('tab-track');
+      document.getElementById('trackInput').value = id;
+      lookupTracking();
+    }
+
     async function submitHardIssue() {
       const c1 = document.getElementById('hardChk1').checked;
       const c2 = document.getElementById('hardChk2').checked;
@@ -1004,36 +1183,55 @@
       const c4 = document.getElementById('hardChk4').checked;
 
       if (!c1 || !c2 || !c3 || !c4) {
-        alert('All 4 physical inspection checklist points must be verified before submitting hard-channel issuance.');
+        alert('All 4 physical inspection checklist points must be verified before submitting hard-channel attestation.');
         return;
       }
 
       const first = document.getElementById('hardFirstName').value.trim();
       const last = document.getElementById('hardLastName').value.trim();
-      const docNumber = document.getElementById('hardDocNum').value.trim().toUpperCase();
+      const cnic = document.getElementById('hardCnic').value.trim();
       const dob = document.getElementById('hardDob').value;
       const country = document.getElementById('hardCountry').value;
-      const credType = document.getElementById('hardCredType').value;
+      const degLevel = document.getElementById('hardDegLevel').value;
+      const progTitle = document.getElementById('hardProgTitle').value.trim();
+      const major = document.getElementById('hardMajor').value.trim();
+      const univSel = document.getElementById('hardUnivSelect').value;
+      const univ = univSel === 'Other Recognized University' ? document.getElementById('hardCustomUniv').value.trim() : univSel;
+      const regNum = document.getElementById('hardRegNum').value.trim().toUpperCase();
+      const docNum = document.getElementById('hardDocNum').value.trim().toUpperCase();
+      const year = document.getElementById('hardYear').value;
+      const challan = document.getElementById('hardChallan').value.trim();
 
-      if (!last || !docNumber) {
-        alert('Claimant Last Name and Document Serial are required.');
+      if (!first || !last || !cnic || !dob || !progTitle || !univ || !regNum || !docNum) {
+        alert('Please complete all fields marked with an asterisk (*).');
         return;
       }
 
       const fullName = [first, document.getElementById('hardMiddleName').value.trim(), last].filter(Boolean).join(' ');
-      const seedStr = `${country}:${credType}:${docNumber}:${dob}:${last.toLowerCase()}`;
+      const seedStr = `${country}:HECDegree:${univ}:${regNum || docNum}:${cnic}`;
       const hash = await sha256Hex(seedStr);
-      const subjectDid = `did:scatterid:user:${hash.substring(0, 16)}`;
+      const subjectDid = `did:scatterid:hec:degree:${hash.substring(0, 16)}`;
 
       const claimantData = {
         fullName,
         firstName: first,
         lastName: last,
+        cnic,
         dateOfBirth: dob,
         country,
-        documentNumber,
+        documentNumber: docNum,
         subjectDid,
-        credentialType: credType
+        credentialType: 'HECDegreeAttestationCredential',
+        degree: {
+          level: degLevel,
+          program: progTitle,
+          major,
+          institution: univ,
+          registrationNumber: regNum,
+          parchmentSerial: docNum,
+          passingYear: year ? parseInt(year, 10) : undefined,
+          challanReference: challan || undefined
+        }
       };
 
       const payload = {
@@ -1047,9 +1245,9 @@
         }
       };
 
-      const resultEl = document.getElementById('hardResult');
-      resultEl.style.display = 'block';
-      resultEl.textContent = 'Submitting Hard-Channel request to Moderation Queue...';
+      const btn = document.getElementById('btnSubmitHard');
+      btn.disabled = true;
+      btn.textContent = 'Submitting to HEC Moderation Queue...';
 
       try {
         const res = await fetch('/api/portal/issue', {
@@ -1058,59 +1256,86 @@
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        resultEl.textContent = JSON.stringify(data, null, 2);
+        btn.disabled = false;
+        btn.textContent = 'Submit Hard-Channel Attestation Request';
+
+        if (!res.ok) {
+          alert('Submission failed: ' + (data.message || data.error));
+          return;
+        }
+
+        const reqId = data.requestId || (data.request && data.request.id) || 'req-unknown';
+        const reqStatus = data.status || (data.request && data.request.status) || 'PENDING';
+
+        showSubmitBanner(
+          'HEC Degree Attestation Request Submitted Successfully!',
+          reqId,
+          reqStatus,
+          'hard',
+          fullName + ' (' + progTitle + ' - ' + univ + ')'
+        );
+
       } catch (err) {
-        resultEl.textContent = 'Error: ' + err.message;
+        btn.disabled = false;
+        btn.textContent = 'Submit Hard-Channel Attestation Request';
+        alert('Error: ' + err.message);
       }
     }
 
     async function submitSoftIssue() {
       const first = document.getElementById('softFirstName').value.trim();
       const last = document.getElementById('softLastName').value.trim();
-      const docNumber = document.getElementById('softDocNum').value.trim().toUpperCase();
+      const cnic = document.getElementById('softCnic').value.trim();
       const dob = document.getElementById('softDob').value;
-      const country = document.getElementById('softCountry').value;
-      const credType = document.getElementById('softCredType').value;
+      const progTitle = document.getElementById('softProgTitle').value.trim();
+      const univ = document.getElementById('softUniv').value.trim();
+      const docNum = document.getElementById('softDocNum').value.trim().toUpperCase();
       const evidenceHash = document.getElementById('softHashInput').value.trim();
 
-      if (!last || !docNumber) {
-        alert('Claimant Last Name and Document Serial are required.');
+      if (!first || !last || !cnic || !dob || !progTitle || !univ || !docNum) {
+        alert('Please complete all required fields (*).');
         return;
       }
       if (!evidenceHash || evidenceHash.length !== 64) {
-        alert('Please select a file to compute its 64-character SHA-256 evidence hash.');
+        alert('Please select a degree scan file to compute its 64-character SHA-256 evidence hash.');
         return;
       }
 
       const fileInput = document.getElementById('softFileInput');
-      const filename = fileInput.files[0] ? fileInput.files[0].name : 'document_scan.pdf';
+      const filename = fileInput.files[0] ? fileInput.files[0].name : 'hec_degree_scan.pdf';
 
       const fullName = [first, document.getElementById('softMiddleName').value.trim(), last].filter(Boolean).join(' ');
-      const seedStr = `${country}:${credType}:${docNumber}:${dob}:${last.toLowerCase()}`;
+      const seedStr = `PK:HECDegree:${univ}:${docNum}:${cnic}`;
       const hash = await sha256Hex(seedStr);
-      const subjectDid = `did:scatterid:user:${hash.substring(0, 16)}`;
+      const subjectDid = `did:scatterid:hec:degree:${hash.substring(0, 16)}`;
 
       const claimantData = {
         fullName,
         firstName: first,
         lastName: last,
+        cnic,
         dateOfBirth: dob,
-        country,
-        documentNumber,
+        country: 'PK',
+        documentNumber: docNum,
         subjectDid,
-        credentialType: credType
+        credentialType: 'HECDegreeAttestationCredential',
+        degree: {
+          program: progTitle,
+          institution: univ,
+          parchmentSerial: docNum
+        }
       };
 
       const payload = {
         submission_channel: 'soft',
         claimant_data: claimantData,
         evidence_sha256: evidenceHash,
-        evidence_payload_path: `/uploads/scans/${filename}`
+        evidence_payload_path: `/uploads/hec_scans/${filename}`
       };
 
-      const resultEl = document.getElementById('softResult');
-      resultEl.style.display = 'block';
-      resultEl.textContent = 'Submitting Soft-Channel request to Moderation Queue...';
+      const btn = document.getElementById('btnSubmitSoft');
+      btn.disabled = true;
+      btn.textContent = 'Submitting E-Attestation Request...';
 
       try {
         const res = await fetch('/api/portal/issue', {
@@ -1119,28 +1344,52 @@
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        resultEl.textContent = JSON.stringify(data, null, 2);
+        btn.disabled = false;
+        btn.textContent = 'Submit Soft-Channel Attestation Request';
+
+        if (!res.ok) {
+          alert('Submission failed: ' + (data.message || data.error));
+          return;
+        }
+
+        const reqId = data.requestId || (data.request && data.request.id) || 'req-unknown';
+        const reqStatus = data.status || (data.request && data.request.status) || 'PENDING';
+
+        showSubmitBanner(
+          'Online E-Attestation Request Submitted Successfully!',
+          reqId,
+          reqStatus,
+          'soft',
+          fullName + ' (' + progTitle + ')'
+        );
+
       } catch (err) {
-        resultEl.textContent = 'Error: ' + err.message;
+        btn.disabled = false;
+        btn.textContent = 'Submit Soft-Channel Attestation Request';
+        alert('Error: ' + err.message);
       }
     }
 
     async function submitRevoke() {
       const credentialId = document.getElementById('revokeCredId').value.trim();
+      const channel = document.getElementById('revokeChannel').value;
+      const reasonCode = document.getElementById('revokeReasonCode').value;
+      const notes = document.getElementById('revokeNotes').value.trim();
+
       if (!credentialId) {
-        alert('Target Credential ID (UUID) is required.');
+        alert('Target Attestation Credential ID (UUID) is required.');
+        return;
+      }
+      if (!notes) {
+        alert('Inquiry case reference or official reason note is required.');
         return;
       }
 
       const payload = {
         credential_id: credentialId,
-        submission_channel: document.getElementById('revokeChannel').value,
-        reason: `${document.getElementById('revokeReasonCode').value} — Notes: ${document.getElementById('revokeNotes').value.trim()}`
+        submission_channel: channel,
+        reason: `${reasonCode} — Ref: ${notes}`
       };
-
-      const resultEl = document.getElementById('revokeResult');
-      resultEl.style.display = 'block';
-      resultEl.textContent = 'Submitting revocation request to Root queue...';
 
       try {
         const res = await fetch('/api/portal/revoke', {
@@ -1149,34 +1398,69 @@
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        resultEl.textContent = JSON.stringify(data, null, 2);
+
+        if (!res.ok) {
+          alert('Revocation submission failed: ' + (data.message || data.error));
+          return;
+        }
+
+        const reqId = data.requestId || (data.request && data.request.id) || 'req-unknown';
+        const reqStatus = data.status || (data.request && data.request.status) || 'PENDING';
+
+        showSubmitBanner(
+          'Attestation Revocation Request Escalated to Root!',
+          reqId,
+          reqStatus,
+          channel,
+          'Target Credential: ' + credentialId
+        );
+
       } catch (err) {
-        resultEl.textContent = 'Error: ' + err.message;
+        alert('Error: ' + err.message);
       }
     }
 
     async function lookupTracking() {
       const id = document.getElementById('trackInput').value.trim();
       if (!id) {
-        alert('Enter a Request ID or UUID.');
+        alert('Enter a Request Tracking ID.');
         return;
       }
 
-      const resultEl = document.getElementById('trackResult');
       const emptyEl = document.getElementById('trackEmptyState');
+      const box = document.getElementById('trackResultBox');
 
       try {
         const res = await fetch(`/api/portal/track/${encodeURIComponent(id)}`, {
           headers: getAuthHeaders()
         });
         const data = await res.json();
+
         emptyEl.style.display = 'none';
-        resultEl.style.display = 'block';
-        resultEl.textContent = JSON.stringify(data, null, 2);
+        box.style.display = 'block';
+
+        if (!res.ok) {
+          box.innerHTML = `<div style="color:var(--red-600); font-weight:600;">Request Not Found: ${data.message || data.error}</div>`;
+          return;
+        }
+
+        const r = data.request;
+        box.innerHTML = `
+          <h3 style="margin-top:0; font-size:16px;">Tracking Report: <code>${r.id}</code></h3>
+          <div class="grid-2" style="font-size:13px;">
+            <div><b>Request Type:</b> ${r.request_type.toUpperCase()}</div>
+            <div><b>Status:</b> <span class="badge ${r.status === 'EXECUTED_ON_LEDGER' ? 'badge-hard':'badge-soft'}">${r.status}</span></div>
+            <div><b>Channel:</b> ${r.submission_channel.toUpperCase()}</div>
+            <div><b>Intake Officer:</b> ${r.clerk_username} @ ${r.station_id}</div>
+            <div><b>Created At:</b> ${new Date(r.created_at).toLocaleString()}</div>
+            <div><b>Updated At:</b> ${new Date(r.updated_at).toLocaleString()}</div>
+          </div>
+          ${r.tx_hash ? `<div style="margin-top:12px; font-size:12.5px;"><b>Fabric Transaction Hash:</b> <code>${r.tx_hash}</code></div>` : ''}
+        `;
       } catch (err) {
         emptyEl.style.display = 'none';
-        resultEl.style.display = 'block';
-        resultEl.textContent = 'Error: ' + err.message;
+        box.style.display = 'block';
+        box.innerHTML = `<div style="color:var(--red-600);">Query Error: ${err.message}</div>`;
       }
     }
 
@@ -1189,10 +1473,10 @@
 
       const isHash = val.length === 64 && /^[0-9a-fA-F]+$/.test(val);
       const payload = isHash ? { dataHash: val } : { credentialId: val };
+      const resBox = document.getElementById('verifyResult');
 
-      const resultEl = document.getElementById('verifyResult');
-      resultEl.style.display = 'block';
-      resultEl.textContent = 'Contacting Verification Gateway...';
+      resBox.style.display = 'block';
+      resBox.textContent = 'Contacting Verification Gateway...';
 
       try {
         const res = await fetch('/api/verify', {
@@ -1201,9 +1485,12 @@
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        resultEl.textContent = JSON.stringify(data, null, 2);
+        resBox.innerHTML = `
+          <div class="preview-header">Gateway Response (${res.status})</div>
+          <pre class="preview-code">${JSON.stringify(data, null, 2)}</pre>
+        `;
       } catch (err) {
-        resultEl.textContent = 'Gateway verification failed: ' + err.message;
+        resBox.textContent = 'Gateway verification failed: ' + err.message;
       }
     }
   </script>
