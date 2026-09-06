@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScatterID Help Desk & Client Portal</title>
+  <style>
+    :root {
+      --bg-slate-900: #0f172a;
+      --bg-slate-800: #1e293b;
+      --bg-slate-700: #334155;
+      --bg-slate-100: #f1f5f9;
+      --bg-slate-50: #f8fafc;
+      --border-slate-800: #1e293b;
+      --border-slate-200: #e2e8f0;
+      --text-slate-100: #f8fafc;
+      --text-slate-900: #0f172a;
+      --text-slate-600: #475569;
+      --text-slate-400: #94a3b8;
+
+      /* Flowbite Palettes (§4) */
+      --blue-primary: #1d4ed8;
+      --blue-hover: #1e40af;
+      --blue-accent-bg: rgba(239, 246, 255, 0.7);
+      --blue-accent-border: #2563eb;
+      
+      --amber-accent-bg: rgba(254, 243, 199, 0.7);
+      --amber-accent-border: #d97706;
+
+      --emerald-bg: #d1fae5;
+      --emerald-text: #065f46;
+      --emerald-border: #10b981;
+
+      --teal-bg: #ccfbf1;
+      --teal-text: #115e59;
+      --teal-border: #14b8a6;
+
+      --rose-bg: #ffe4e6;
+      --rose-text: #9f1239;
+      --rose-border: #f43f5e;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+      background-color: var(--bg-slate-50);
+      color: var(--text-slate-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Persistent Dark-Slate Header (§2) */
+    header.helpdesk-header {
+      background: var(--bg-slate-900);
+      color: var(--text-slate-100);
+      border-bottom: 1px solid var(--border-slate-800);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-logo span.badge-sq {
+      background: #0284c7;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .desk-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-slate-800);
+      padding: 3px;
+      border-radius: 6px;
+    }
+    .desk-tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-slate-400);
+      padding: 6px 14px;
+      font-size: 12.5px;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .desk-tab-btn:hover { color: #fff; }
+    .desk-tab-btn.active {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    .clerk-station-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+    .station-pill {
+      background: var(--bg-slate-800);
+      border: 1px solid var(--bg-slate-700);
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+    }
+
+    /* Container */
+    .portal-container {
+      max-width: 1040px;
+      margin: 28px auto;
+      padding: 0 20px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Flowbite Cards (§3) */
+    .flowbite-card {
+      background: #ffffff;
+      border: 1px solid var(--border-slate-200);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-slate-900);
+      margin-top: 0;
+      margin-bottom: 4px;
+    }
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-slate-600);
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    /* Channel Selector Cards (§3.1 Section 2) */
+    .channel-selector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+    @media (max-width: 768px) {
+      .channel-selector-grid { grid-template-columns: 1fr; }
+    }
+    .channel-card {
+      border: 2px solid var(--border-slate-200);
+      border-radius: 8px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: #ffffff;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .channel-card input[type="radio"] {
+      margin-top: 3px;
+      accent-color: #0284c7;
+      width: 18px;
+      height: 18px;
+    }
+    .channel-card.active-hard {
+      border-color: var(--blue-accent-border);
+      background: var(--blue-accent-bg);
+    }
+    .channel-card.active-soft {
+      border-color: var(--amber-accent-border);
+      background: var(--amber-accent-bg);
+    }
+    .channel-heading {
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+    .channel-subtext {
+      font-size: 12px;
+      color: var(--text-slate-600);
+    }
+
+    /* Forms & Inputs */
+    .form-group { margin-bottom: 16px; }
+    label.label-text {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-slate-700);
+      margin-bottom: 6px;
+    }
+    .req { color: #dc2626; font-weight: bold; margin-left: 2px; }
+    input[type="text"],
+    input[type="date"],
+    input[type="password"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border-slate-200);
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 768px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Checkbox Group (§3.1 Hard Channel) */
+    .checklist-container {
+      background: #f8fafc;
+      border: 1px solid var(--border-slate-200);
+      border-radius: 6px;
+      padding: 16px;
+      margin: 12px 0 16px 0;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      cursor: pointer;
+      accent-color: #0284c7;
+    }
+
+    /* File Drop Area (§3.1 Soft Channel) */
+    .file-dropzone {
+      border: 2px dashed #94a3b8;
+      border-radius: 6px;
+      padding: 24px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      margin: 12px 0;
+    }
+    .file-dropzone:hover {
+      border-color: #0284c7;
+      background: #f0f9ff;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-blue {
+      background: var(--blue-primary);
+      color: #ffffff;
+    }
+    .btn-blue:hover { background: var(--blue-hover); }
+    .btn-neutral {
+      background: #ffffff;
+      color: var(--text-slate-700);
+      border-color: var(--border-slate-200);
+    }
+    .btn-neutral:hover { background: #f1f5f9; }
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+    }
+    .btn-danger:hover { background: #b91c1c; }
+
+    /* Modals (§3.1, §3.4) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(3px);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-box {
+      background: #ffffff;
+      border-radius: 8px;
+      width: 520px;
+      max-width: 90vw;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      border: 1px solid var(--border-slate-200);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-slate-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 14px 20px;
+      background: #f8fafc;
+      border-top: 1px solid var(--border-slate-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Verification Cards Side-by-Side (§3.2) */
+    .verify-results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+    @media (max-width: 768px) {
+      .verify-results-grid { grid-template-columns: 1fr; }
+    }
+    .verify-badge-card {
+      border: 1px solid;
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .verify-badge-card.level1 {
+      background: var(--emerald-bg);
+      color: var(--emerald-text);
+      border-color: var(--emerald-border);
+    }
+    .verify-badge-card.level2 {
+      background: var(--teal-bg);
+      color: var(--teal-text);
+      border-color: var(--teal-border);
+    }
+    .verify-badge-card.revoked {
+      background: var(--rose-bg);
+      color: var(--rose-text);
+      border-color: var(--rose-border);
+    }
+
+    /* Tracking Stepper (§3.4) */
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+      position: relative;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 20px;
+      right: 20px;
+      height: 2px;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+    .step-item {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      flex: 1;
+    }
+    .step-node {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #94a3b8;
+      margin: 0 auto 6px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .step-item.completed .step-node {
+      border-color: #10b981;
+      background: #10b981;
+      color: #fff;
+    }
+    .step-item.active .step-node {
+      border-color: #2563eb;
+      color: #2563eb;
+    }
+    .step-label { font-size: 11px; color: #64748b; font-weight: 600; }
+    .step-item.completed .step-label { color: #065f46; font-weight: 700; }
+    .step-item.active .step-label { color: #1e40af; font-weight: 700; }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #0369a1;
+    }
+    .desk-view { display: none; }
+    .desk-view.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- PERSISTENT GLOBAL HEADER (§2) -->
+  <header class="helpdesk-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <span class="badge-sq">S</span>
+        <span>ScatterID Help Desk</span>
+      </div>
+      <nav class="desk-nav">
+        <button class="desk-tab-btn active" onclick="switchDesk('issue', this)">Issue Desk</button>
+        <button class="desk-tab-btn" onclick="switchDesk('verify', this)">Verify Desk</button>
+        <button class="desk-tab-btn" onclick="switchDesk('revoke', this)">Revoke Desk</button>
+      </nav>
+    </div>
+
+    <div class="clerk-station-bar">
+      <span class="station-pill" id="stationStatusPill">
+        <span class="pulse-dot"></span>
+        <span id="vpnStatusText">VPN Connected (10.20.0.14)</span>
+      </span>
+      <span class="station-pill" id="clerkIdentityPill">
+        <span id="clerkNameLabel">clk_john</span> | <span id="clerkStationLabel">Station Counter-01</span>
+      </span>
+      <button class="btn btn-neutral" style="padding:4px 10px; font-size:11.5px;" onclick="openTrackingModal()">Track Request ↗</button>
+      <button class="btn btn-neutral" style="padding:4px 10px; font-size:11.5px;" onclick="openSecurityModal()">Security</button>
+      <button class="btn btn-neutral" style="padding:4px 10px; font-size:11.5px;" onclick="doClerkLogout()">Log Out</button>
+    </div>
+  </header>
+
+  <main class="portal-container">
+
+    <!-- CLERK AUTHENTICATION CARD (IF SESSION INVALID) -->
+    <div id="clerkAuthCard" class="flowbite-card" style="max-width:440px; margin:40px auto; display:none;">
+      <h3 class="card-title">Counter Clerk Authentication</h3>
+      <p class="card-subtitle">Sign in over secure Counter VPN (10.20.0.0/24)</p>
+      
+      <div class="form-group">
+        <label class="label-text">Station Identifier</label>
+        <input type="text" id="authStationId" value="Counter-01">
+      </div>
+      <div class="form-group">
+        <label class="label-text">Clerk Username <span class="req">*</span></label>
+        <input type="text" id="authUsername" placeholder="e.g. clerk_john">
+      </div>
+      <div class="form-group">
+        <label class="label-text">Password <span class="req">*</span></label>
+        <input type="password" id="authPassword" placeholder="Enter clerk password">
+      </div>
+      <button class="btn btn-blue" style="width:100%;" onclick="doClerkLogin()">Sign In to Counter Desk →</button>
+    </div>
+
+    <!-- CLERK FIRST-TIME SECURITY ONBOARDING CARD -->
+    <div id="clerkOnboardCard" class="flowbite-card" style="max-width:480px; margin:40px auto; display:none;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 class="card-title" style="margin:0;">First-Time Security Onboarding</h3>
+        <span class="channel-badge" style="background:#f3e8ff; color:#6b21a8; border:1px solid #c084fc;">SETUP REQUIRED</span>
+      </div>
+      <p class="card-subtitle" style="margin-bottom:16px;">
+        You authenticated with temporary one-time credentials. You must establish a permanent password to activate this counter station.
+      </p>
+
+      <div id="clerkOnboardError" style="display:none; background:#fee2e2; border-left:4px solid #ef4444; color:#991b1b; padding:10px; margin-bottom:14px; font-size:13px; border-radius:4px;"></div>
+
+      <div class="form-group">
+        <label class="label-text">Staff Account</label>
+        <input type="text" id="onboardUsername" readonly style="background:#f1f5f9; font-weight:700; color:#1e293b;">
+      </div>
+
+      <div class="form-group">
+        <label class="label-text">New Permanent Password (min 10 chars) <span class="req">*</span></label>
+        <input type="password" id="onboardPass1" placeholder="Enter new permanent password" oninput="checkClerkPassMatch()">
+      </div>
+
+      <div class="form-group">
+        <label class="label-text">Confirm Permanent Password <span class="req">*</span></label>
+        <input type="password" id="onboardPass2" placeholder="Re-enter same permanent password" oninput="checkClerkPassMatch()">
+        <span id="clerkPassMatchMsg" style="font-size:11.5px; display:block; margin-top:4px;"></span>
+      </div>
+
+      <div id="clerkMfaSection" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid #e2e8f0;">
+        <label class="label-text" style="font-weight:700;">Mobile Authenticator App (TOTP - Optional for Clerk)</label>
+        <p style="font-size:12px; color:#64748b; margin:4px 0 10px 0;">Optional: Scan QR code with authenticator app if enrolling MFA</p>
+        <div style="text-align:center; margin-bottom:12px;">
+          <img id="clerkQrImg" src="" style="width:140px; height:140px; border:1px solid #e2e8f0; border-radius:4px; padding:4px;">
+          <div style="font-size:11px; color:#64748b; margin-top:4px;">Manual: <code id="clerkSecretText"></code></div>
+        </div>
+        <div class="form-group">
+          <label class="label-text">6-Digit Code (Leave blank if not enrolling TOTP)</label>
+          <input type="text" id="clerkTotpCode" placeholder="123456" maxlength="6" style="text-align:center; font-weight:700; letter-spacing:2px;">
+        </div>
+      </div>
+
+      <button class="btn btn-blue" id="btnSubmitClerkOnboard" style="width:100%; margin-top:10px;" onclick="submitClerkOnboarding()">
+        Activate Station Credentials →
+      </button>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- 3.1 ISSUE DESK -->
+    <!-- ============================================================= -->
+    <div id="desk-issue" class="desk-view active">
+      <div class="flowbite-card">
+        <!-- SECTION 1: CLAIMANT DETAILS -->
+        <h3 class="card-title">1. Claimant Details & Specifications</h3>
+        <p class="card-subtitle">Collect sovereign identity attributes for counter attestation</p>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label-text">Claimant Full Legal Name <span class="req">*</span></label>
+            <input type="text" id="issueFullName" placeholder="e.g. Dr. Sofia Martinez">
+          </div>
+          <div class="form-group">
+            <label class="label-text">Claimant Date of Birth / Identifier <span class="req">*</span></label>
+            <input type="date" id="issueDob">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label-text">Credential Type Selector <span class="req">*</span></label>
+            <select id="issueCredType" onchange="handleCredTypeChange(this)">
+              <option value="National Identity Proof">National Identity Proof</option>
+              <option value="Civil Registry Record">Civil Registry Record</option>
+              <option value="Professional Credential">Professional Credential</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label-text">National / State Identifier Number <span class="req">*</span></label>
+            <input type="text" id="issueNatId" placeholder="e.g. ID-9920148-X">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label-text">Issuing Authority / Jurisdiction <span class="req">*</span></label>
+            <input type="text" id="issueAuthority" placeholder="e.g. Federal Civil Identity Registry">
+          </div>
+          <div class="form-group">
+            <label class="label-text">Credential Reference / Document Serial <span class="req">*</span></label>
+            <input type="text" id="issueSerial" placeholder="e.g. DOC-SERIAL-448201">
+          </div>
+        </div>
+
+        <!-- SECTION 2: VERIFICATION CHANNEL SELECTOR (CRUCIAL COMPONENT) -->
+        <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border-slate-200);">
+          <h3 class="card-title">2. Verification Channel Selector</h3>
+          <p class="card-subtitle">Select intake channel & record physical/digital inspection evidence</p>
+
+          <div class="channel-selector-grid">
+            <label class="channel-card active-hard" id="cardHardChannel" onclick="setChannel('hard')">
+              <input type="radio" name="intake_channel" id="radioHard" checked>
+              <div>
+                <div class="channel-heading">(*) HARD CHANNEL</div>
+                <div class="channel-subtext">Physical Document Inspected In-Person</div>
+                <div style="font-size:11.5px; color:#1e40af; margin-top:4px; font-weight:600;">
+                  ⚡ Fast-track: Auto-executes upon Mod approval
+                </div>
+              </div>
+            </label>
+
+            <label class="channel-card" id="cardSoftChannel" onclick="setChannel('soft')">
+              <input type="radio" name="intake_channel" id="radioSoft">
+              <div>
+                <div class="channel-heading">( ) SOFT CHANNEL</div>
+                <div class="channel-subtext">Digital Upload / Scan Submission</div>
+                <div style="font-size:11.5px; color:#b45309; margin-top:4px; font-weight:600;">
+                  🛡️ Escalates: Requires Mod + Root authorization
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <!-- HARD CHANNEL ACTIVE: CHECKLIST -->
+          <div id="sectionHardChannel">
+            <div class="checklist-container">
+              <label class="label-text" style="font-weight:700; margin-bottom:12px;">Physical Document Inspection Checklist (All Required): <span class="req">*</span></label>
+              <label class="checkbox-item"><input type="checkbox" id="chk1"> Physical document presented in original form (no photocopies)</label>
+              <label class="checkbox-item"><input type="checkbox" id="chk2"> Security features inspected (UV watermark / holographic seal / microtext)</label>
+              <label class="checkbox-item"><input type="checkbox" id="chk3"> Facial likeness matched against in-person claimant</label>
+              <label class="checkbox-item"><input type="checkbox" id="chk4"> Physical condition of document verified (no tampering / delamination)</label>
+            </div>
+
+            <div class="form-group">
+              <label class="label-text">Inspector Observations / Document Serial Number <span class="req">*</span></label>
+              <textarea id="hardObservations" rows="2" placeholder="e.g. Sighted original physical document; security guilloche intact under magnifier; face match confirmed."></textarea>
+            </div>
+          </div>
+
+          <!-- SOFT CHANNEL ACTIVE: UPLOAD ZONE -->
+          <div id="sectionSoftChannel" style="display:none;">
+            <div class="file-dropzone" onclick="document.getElementById('softUploadInput').click()">
+              <input type="file" id="softUploadInput" style="display:none;" accept=".pdf,.png,.jpeg,.jpg" onchange="handleSoftFile(event)">
+              <div id="softDropText" style="font-weight:700; font-size:14px; color:#1d4ed8;">
+                📁 Drop Digital Document Scan (PDF, PNG, JPEG &bull; Max 15MB)
+              </div>
+              <div style="font-size:12px; color:var(--text-slate-600); margin-top:4px;">
+                Client-side SHA-256 calculated locally prior to transmission
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:10px;">
+              <label class="label-text">Computed Document SHA-256 Digest:</label>
+              <input type="text" id="softComputedHash" readonly placeholder="64-character SHA-256 hash auto-computes upon file selection" style="font-family:var(--font-mono); color:#1d4ed8;">
+            </div>
+
+            <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:6px; padding:10px 14px; font-size:12px; color:#92400e;">
+              ⚠️ <b>Notice:</b> Soft channel submissions require supervisory Root review before issuance.
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: AUDIT ATTRIBUTION & SUBMISSION -->
+        <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border-slate-200);">
+          <h3 class="card-title">3. Audit Attribution & Submission</h3>
+          <div style="background:#f8fafc; border:1px solid var(--border-slate-200); border-radius:6px; padding:12px 16px; margin-bottom:18px; font-size:12.5px;">
+            <b>Immutable Attribution Stamp:</b><br>
+            <span id="attributionPreviewText">Submitted By: clk_john (clk_042) | Station: Counter-01 | Channel: HARD</span>
+          </div>
+
+          <button class="btn btn-blue" id="btnSubmitIssue" onclick="submitIssueRequest()" style="width:100%; font-size:14px; padding:12px;">
+            Submit Credential Request →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- 3.2 VERIFY DESK -->
+    <!-- ============================================================= -->
+    <div id="desk-verify" class="desk-view">
+      <div class="flowbite-card">
+        <h3 class="card-title">Verify Desk — Zero-Latency Gateway Probe</h3>
+        <p class="card-subtitle">Direct, read-only Level-1 and Level-2 verification against live Verification Gateway</p>
+
+        <!-- INPUT METHOD TABS (§3.2) -->
+        <div class="desk-nav" style="width:fit-content; margin-bottom:16px;">
+          <button class="desk-tab-btn active" onclick="switchVerifyInput('hash', this)">Paste Hash / ID</button>
+          <button class="desk-tab-btn" onclick="switchVerifyInput('file', this)">Upload Credential Token</button>
+          <button class="desk-tab-btn" onclick="switchVerifyInput('qr', this)">Scan QR Code</button>
+        </div>
+
+        <div id="vinput-hash">
+          <div class="form-group">
+            <label class="label-text">Credential UUID or SHA3-256 Data Hash <span class="req">*</span></label>
+            <input type="text" id="verifyQueryInput" placeholder="e.g. 1e1dbbe7-da4c-45c2-a22f-ee8fe479ce80 or 64-char hash">
+          </div>
+        </div>
+
+        <div id="vinput-file" style="display:none;">
+          <div class="file-dropzone" onclick="document.getElementById('verifyTokenFileInput').click()">
+            <input type="file" id="verifyTokenFileInput" style="display:none;" accept=".json" onchange="handleTokenFile(event)">
+            <div style="font-weight:700; color:#1d4ed8;">📄 Select Credential JSON Token File</div>
+          </div>
+        </div>
+
+        <div id="vinput-qr" style="display:none;">
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:20px; text-align:center;">
+            📷 Ready for USB Barcode / Camera Scanner input
+            <input type="text" id="verifyQrInput" placeholder="Scan result..." style="margin-top:10px;" onchange="document.getElementById('verifyQueryInput').value=this.value">
+          </div>
+        </div>
+
+        <button class="btn btn-blue" onclick="runImmediateVerification()" style="margin-top:8px;">
+          Run Immediate Verification →
+        </button>
+
+        <!-- RESULT DISPLAY: TWO CARDS SIDE-BY-SIDE (§3.2) -->
+        <div id="verifyResultsContainer" style="display:none;">
+          <div class="verify-results-grid">
+            <!-- LEVEL 1: INTEGRITY -->
+            <div class="verify-badge-card level1" id="cardLevel1">
+              <div style="font-weight:800; font-size:13px; margin-bottom:4px;">
+                ✓ LEVEL 1: INTEGRITY VERIFICATION
+              </div>
+              <div style="font-size:12px; line-height:1.6;">
+                <b>Status:</b> PASSED &bull; RFC 8785 Canonical Hash Matches SHA-256 Payload.<br>
+                <b>Calculated:</b> <code id="level1Hash">64-char...</code>
+              </div>
+            </div>
+
+            <!-- LEVEL 2: AUTHENTICITY & PQC SIGNATURE -->
+            <div class="verify-badge-card level2" id="cardLevel2">
+              <div style="font-weight:800; font-size:13px; margin-bottom:4px;">
+                ✓ LEVEL 2: AUTHENTICITY & PQC SIGNATURE
+              </div>
+              <div style="font-size:12px; line-height:1.6;">
+                <b>Status:</b> PASSED &bull; ML-DSA-87 Quantum-Safe Signature Valid.<br>
+                <b>Signer Key ID:</b> <code id="level2KeyId">pqc-mldsa-root-v2</code><br>
+                <b>Ledger Status:</b> <span style="font-weight:700;">ACTIVE (Hyperledger Fabric)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVOCATION RED ALERT (§3.2) -->
+        <div id="verifyRevokedAlert" class="verify-badge-card revoked" style="display:none; margin-top:18px;">
+          <div style="font-weight:800; font-size:13.5px; margin-bottom:4px;">
+            ✕ FAILED / REVOKED CREDENTIAL
+          </div>
+          <div style="font-size:12.5px;" id="revokeAlertMsg">
+            Credential was revoked on ledger. Reason: Document Reported Compromised.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- 3.3 REVOKE DESK -->
+    <!-- ============================================================= -->
+    <div id="desk-revoke" class="desk-view">
+      <div class="flowbite-card">
+        <h3 class="card-title">Revoke Desk — Invalidation Intake Terminal</h3>
+        <p class="card-subtitle">Intake revocations for permanent Hyperledger Fabric invalidation</p>
+
+        <div class="form-group">
+          <label class="label-text">Target Credential ID (UUID) <span class="req">*</span></label>
+          <input type="text" id="revokeTargetId" placeholder="e.g. 1e1dbbe7-da4c-45c2-a22f-ee8fe479ce80">
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label-text">Revocation Reason Selector <span class="req">*</span></label>
+            <select id="revokeReasonSel">
+              <option value="Key Compromise / Credential Lost">Key Compromise / Credential Lost</option>
+              <option value="Claimant Identity Data Superseded">Claimant Identity Data Superseded</option>
+              <option value="Administrative Withdrawal / Fraud Discovered">Administrative Withdrawal / Fraud Discovered</option>
+              <option value="Claimant Deceased">Claimant Deceased</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label-text">Revocation Channel Selector <span class="req">*</span></label>
+            <select id="revokeChannelSel">
+              <option value="hard">Hard Channel (Physical Document Confiscated at Counter)</option>
+              <option value="soft">Soft Channel (Digital Notice / External Order)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="label-text">Case Notes / Official Docket Ref <span class="req">*</span></label>
+          <input type="text" id="revokeDocketRef" placeholder="e.g. DOCKET-REV-2026-8801">
+        </div>
+
+        <button class="btn btn-danger" onclick="openRevokeConfirmModal()" style="width:100%; font-size:14px; padding:12px; margin-top:8px;">
+          Submit Credential Revocation Ticket →
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- CONFIRMATION MODAL (§3.1 POST-SUBMISSION) -->
+  <div class="modal-backdrop" id="submissionModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:15px; color:#065f46;">✓ Credential Request Submitted</h3>
+        <button class="btn btn-neutral" style="padding:2px 6px;" onclick="closeModal('submissionModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#d1fae5; border:1px solid #10b981; border-radius:6px; padding:14px; margin-bottom:16px;">
+          <div style="font-size:12px; color:#065f46; font-weight:700; text-transform:uppercase;">Assigned Request Tracking ID:</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+            <code id="modalReqId" style="font-size:15px; font-weight:800; color:#065f46; background:#fff; padding:4px 8px; border:1px solid #a7f3d0;">REQ-2026-0905-HARD-08421</code>
+            <button class="btn btn-neutral" style="padding:3px 8px; font-size:11px;" onclick="copyModalReqId()">Copy ID</button>
+          </div>
+        </div>
+
+        <div style="font-size:13px; color:var(--text-slate-700); line-height:1.6;" id="modalRoutingDesc">
+          Hard Channel: Forwarded to Moderator Queue for direct verification & auto-issuance.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-blue" onclick="closeModal('submissionModal'); switchDesk('verify', document.querySelectorAll('.desk-tab-btn')[1]);">Proceed to Verify Desk</button>
+        <button class="btn btn-neutral" onclick="closeModal('submissionModal')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVOCATION HIGH-IMPACT CONFIRMATION MODAL (§3.3) -->
+  <div class="modal-backdrop" id="revokeModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:15px; color:#9f1239;">Confirm Credential Invalidation</h3>
+        <button class="btn btn-neutral" style="padding:2px 6px;" onclick="closeModal('revokeModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#ffe4e6; border:1px solid #f43f5e; border-radius:6px; padding:14px; font-size:13px; color:#9f1239; line-height:1.5;">
+          <b>Warning: Irreversible Action</b><br>
+          Revocation permanently invalidates this credential on Hyperledger Fabric. Under Tiered Risk controls, all revocations require final authorization and execution by the Root Administrator.
+        </div>
+        <div style="margin-top:14px; font-size:13px;">
+          Target Credential: <code id="revokeModalTarget">cred-id</code>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="executeRevocationSubmit()">Confirm & Advance to Root</button>
+        <button class="btn btn-neutral" onclick="closeModal('revokeModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REQUEST STATUS LOOKUP MODAL (§3.4) -->
+  <div class="modal-backdrop" id="trackingModal">
+    <div class="modal-box" style="width:580px;">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:15px;">Request Status Tracking Lookup</h3>
+        <button class="btn btn-neutral" style="padding:2px 6px;" onclick="closeModal('trackingModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex; gap:8px; margin-bottom:18px;">
+          <input type="text" id="modalTrackInput" placeholder="Enter Request ID (e.g. REQ-2026-...)" style="font-family:var(--font-mono);">
+          <button class="btn btn-blue" onclick="queryTrackModal()">Lookup</button>
+        </div>
+
+        <div id="modalTrackResult" style="display:none;">
+          <div class="stepper" id="modalStepper">
+            <div class="step-item completed" id="st1">
+              <div class="step-node">1</div>
+              <div class="step-label">Submitted</div>
+            </div>
+            <div class="step-item" id="st2">
+              <div class="step-node">2</div>
+              <div class="step-label">Moderator</div>
+            </div>
+            <div class="step-item" id="st3">
+              <div class="step-node">3</div>
+              <div class="step-label">Root Auth</div>
+            </div>
+            <div class="step-item" id="st4">
+              <div class="step-node">4</div>
+              <div class="step-label">Execution</div>
+            </div>
+          </div>
+
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px; font-size:12.5px; line-height:1.7;">
+            <div><b>Status:</b> <span id="trackStatusBadge" style="font-weight:700;">PENDING</span></div>
+            <div><b>Channel:</b> <span id="trackChannelBadge">HARD</span></div>
+            <div><b>Station:</b> <span id="trackStationText">Counter-01</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-neutral" onclick="closeModal('trackingModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLERK SECURITY MODAL (§3.5) -->
+  <div class="modal-backdrop" id="securityModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:15px;">Clerk Security & Session Details</h3>
+        <button class="btn btn-neutral" style="padding:2px 6px;" onclick="closeModal('securityModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="label-text">Current Password</label>
+          <input type="password" id="secCurrentPass">
+        </div>
+        <div class="form-group">
+          <label class="label-text">New Permanent Password (min 12 chars)</label>
+          <input type="password" id="secNewPass">
+        </div>
+        <div class="form-group">
+          <label class="label-text">Confirm New Password</label>
+          <input type="password" id="secConfirmPass">
+        </div>
+        <div style="font-size:12px; color:#64748b; margin-top:8px;">
+          Station: Counter-01 &bull; Session TTL: 15 min idle timeout
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-blue" onclick="saveClerkPassword()">Update Password</button>
+        <button class="btn btn-neutral" onclick="closeModal('securityModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeChannel = 'hard';
+    let softComputedHash = '';
+    let clerkToken = '';
+    let clerkTempToken = '';
+    let clerkOnboardData = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      checkClerkAuth();
+
+      // Enter key listeners for login & onboarding
+      ['authUsername', 'authPassword', 'authStationId'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') doClerkLogin();
+          });
+        }
+      });
+
+      ['onboardPass1', 'onboardPass2', 'clerkTotpCode'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitClerkOnboarding();
+          });
+        }
+      });
+    });
+
+    async function checkClerkAuth() {
+      clerkToken = sessionStorage.getItem('scatterid_clerk_token') || '';
+      const userRaw = sessionStorage.getItem('scatterid_clerk_user');
+      const station = sessionStorage.getItem('scatterid_clerk_station') || 'Counter-01';
+
+      if (!clerkToken || !userRaw || clerkToken === 'undefined' || userRaw === 'undefined') {
+        sessionStorage.removeItem('scatterid_clerk_token');
+        sessionStorage.removeItem('scatterid_clerk_user');
+        clerkToken = '';
+        document.getElementById('clerkAuthCard').style.display = 'block';
+        document.getElementById('clerkOnboardCard').style.display = 'none';
+        document.querySelectorAll('.desk-view').forEach(d => d.style.display = 'none');
+        document.getElementById('clerkNameLabel').textContent = 'Not Authenticated';
+        document.getElementById('clerkStationLabel').textContent = 'No Station';
+        return;
+      }
+
+      // Verify token with backend
+      try {
+        const checkRes = await fetch('/api/portal/me', {
+          headers: { 'Authorization': `Bearer ${clerkToken}` }
+        });
+        if (checkRes.status === 401) {
+          sessionStorage.removeItem('scatterid_clerk_token');
+          sessionStorage.removeItem('scatterid_clerk_user');
+          clerkToken = '';
+          document.getElementById('clerkAuthCard').style.display = 'block';
+          document.getElementById('clerkOnboardCard').style.display = 'none';
+          document.querySelectorAll('.desk-view').forEach(d => d.style.display = 'none');
+          document.getElementById('clerkNameLabel').textContent = 'Not Authenticated';
+          return;
+        }
+      } catch(e) {}
+
+      try {
+        const u = JSON.parse(userRaw);
+        document.getElementById('clerkNameLabel').textContent = `${u.username}`;
+        document.getElementById('clerkStationLabel').textContent = `Station ${station}`;
+        document.getElementById('attributionPreviewText').textContent = `Submitted By: ${u.username} | Station: ${station} | Channel: ${activeChannel.toUpperCase()}`;
+        document.getElementById('clerkAuthCard').style.display = 'none';
+        document.getElementById('clerkOnboardCard').style.display = 'none';
+        
+        // Show active desk
+        document.querySelectorAll('.desk-view').forEach(d => d.style.display = 'none');
+        const activeTab = document.querySelector('.desk-tab-btn.active');
+        const targetDeskName = activeTab ? (activeTab.textContent.toLowerCase().includes('verify') ? 'verify' : (activeTab.textContent.toLowerCase().includes('revoke') ? 'revoke' : 'issue')) : 'issue';
+        const targetDesk = document.getElementById(`desk-${targetDeskName}`);
+        if (targetDesk) targetDesk.style.display = 'block';
+      } catch(e) {
+        sessionStorage.clear();
+        clerkToken = '';
+        document.getElementById('clerkAuthCard').style.display = 'block';
+        document.querySelectorAll('.desk-view').forEach(d => d.style.display = 'none');
+      }
+    }
+
+    async function doClerkLogin() {
+      const username = document.getElementById('authUsername').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      const station = document.getElementById('authStationId').value.trim() || 'Counter-01';
+
+      if (!username || !password) {
+        alert('Please enter both username and password.');
+        return;
+      }
+
+      const btn = document.querySelector('#clerkAuthCard button');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Authenticating...';
+      }
+
+      try {
+        const res = await fetch('/api/portal/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Sign In to Counter Desk →';
+        }
+
+        if (!res.ok) {
+          alert('Login failed: ' + (data.message || data.error));
+          return;
+        }
+
+        // Case A: First-time onboarding / credential setup required
+        if (data.requireFirstTimeSetup) {
+          clerkTempToken = data.tempToken;
+          clerkOnboardData = data;
+          document.getElementById('onboardUsername').value = data.username || username;
+          document.getElementById('clerkAuthCard').style.display = 'none';
+          document.getElementById('clerkOnboardCard').style.display = 'block';
+
+          if (data.mfaSetup && data.mfaSetup.qrCodeDataUrl) {
+            document.getElementById('clerkMfaSection').style.display = 'block';
+            document.getElementById('clerkQrImg').src = data.mfaSetup.qrCodeDataUrl;
+            document.getElementById('clerkSecretText').textContent = data.mfaSetup.secret;
+          }
+          return;
+        }
+
+        // Case B: Full login
+        clerkToken = data.token;
+        sessionStorage.setItem('scatterid_clerk_token', data.token);
+        sessionStorage.setItem('scatterid_clerk_user', JSON.stringify(data.user));
+        sessionStorage.setItem('scatterid_clerk_station', station);
+        checkClerkAuth();
+      } catch(e) {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Sign In to Counter Desk →';
+        }
+        alert('Network error: ' + e.message);
+      }
+    }
+
+    function checkClerkPassMatch() {
+      const p1 = document.getElementById('onboardPass1').value;
+      const p2 = document.getElementById('onboardPass2').value;
+      const msg = document.getElementById('clerkPassMatchMsg');
+      if (!p2) { msg.textContent = ''; return; }
+      if (p1 === p2) {
+        msg.textContent = '✓ Passwords match';
+        msg.style.color = '#059669';
+      } else {
+        msg.textContent = '✗ Passwords do not match';
+        msg.style.color = '#dc2626';
+      }
+    }
+
+    async function submitClerkOnboarding() {
+      const p1 = document.getElementById('onboardPass1').value.trim();
+      const p2 = document.getElementById('onboardPass2').value.trim();
+      const code = document.getElementById('clerkTotpCode').value.trim().replace(/\s+/g, '').replace(/-/g, '');
+      const errEl = document.getElementById('clerkOnboardError');
+      errEl.style.display = 'none';
+
+      if (!p1 || p1.length < 10) {
+        errEl.textContent = 'Permanent password must be at least 10 characters long.';
+        errEl.style.display = 'block';
+        return;
+      }
+      if (p1 !== p2) {
+        errEl.textContent = 'Passwords do not match. Please verify your typing.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmitClerkOnboard');
+      btn.disabled = true;
+      btn.textContent = 'Activating Permanent Credentials...';
+
+      try {
+        const payload = { newPassword: p1 };
+        if (clerkOnboardData && clerkOnboardData.mfaSetup && code) {
+          payload.totpCode = code;
+          payload.totpSecret = clerkOnboardData.mfaSetup.secret;
+          payload.recoveryCodes = clerkOnboardData.mfaSetup.recoveryCodes;
+        }
+
+        const res = await fetch('/api/portal/first-time-setup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${clerkTempToken}`
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = 'Activate Station Credentials →';
+
+        if (!res.ok) {
+          errEl.textContent = data.message || data.error || 'Onboarding failed.';
+          errEl.style.display = 'block';
+          return;
+        }
+
+        const station = document.getElementById('authStationId').value.trim() || 'Counter-01';
+        clerkToken = data.token;
+        sessionStorage.setItem('scatterid_clerk_token', data.token);
+        sessionStorage.setItem('scatterid_clerk_user', JSON.stringify(data.user));
+        sessionStorage.setItem('scatterid_clerk_station', station);
+
+        document.getElementById('clerkOnboardCard').style.display = 'none';
+        alert('Account credentials established successfully! Welcome to the ScatterID Help Desk.');
+        checkClerkAuth();
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = 'Activate Station Credentials →';
+        errEl.textContent = 'Network error during setup: ' + e.message;
+        errEl.style.display = 'block';
+      }
+    }
+
+    function doClerkLogout() {
+      sessionStorage.clear();
+      clerkToken = '';
+      checkClerkAuth();
+    }
+
+    function switchDesk(deskName, btn) {
+      document.querySelectorAll('.desk-view').forEach(d => {
+        d.classList.remove('active');
+        d.style.display = 'none';
+      });
+      document.querySelectorAll('.desk-tab-btn').forEach(b => b.classList.remove('active'));
+      const target = document.getElementById(`desk-${deskName}`);
+      if (target) {
+        target.classList.add('active');
+        target.style.display = 'block';
+      }
+      if (btn) btn.classList.add('active');
+    }
+
+    // CHANNEL SELECTOR (§3.1 Section 2)
+    function setChannel(channel) {
+      activeChannel = channel;
+      const cardHard = document.getElementById('cardHardChannel');
+      const cardSoft = document.getElementById('cardSoftChannel');
+      const secHard = document.getElementById('sectionHardChannel');
+      const secSoft = document.getElementById('sectionSoftChannel');
+
+      if (channel === 'hard') {
+        cardHard.className = 'channel-card active-hard';
+        cardSoft.className = 'channel-card';
+        document.getElementById('radioHard').checked = true;
+        secHard.style.display = 'block';
+        secSoft.style.display = 'none';
+      } else {
+        cardHard.className = 'channel-card';
+        cardSoft.className = 'channel-card active-soft';
+        document.getElementById('radioSoft').checked = true;
+        secHard.style.display = 'none';
+        secSoft.style.display = 'block';
+      }
+
+      const station = sessionStorage.getItem('scatterid_clerk_station') || 'Counter-01';
+      document.getElementById('attributionPreviewText').textContent = `Submitted By: clk_john | Station: ${station} | Channel: ${activeChannel.toUpperCase()}`;
+    }
+
+    async function handleSoftFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      document.getElementById('softDropText').textContent = `📄 Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      const buffer = await file.arrayBuffer();
+      const digest = await crypto.subtle.digest('SHA-256', buffer);
+      softComputedHash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+      document.getElementById('softComputedHash').value = softComputedHash;
+    }
+
+    // SUBMIT ISSUE REQUEST (§3.1 Section 3)
+    async function submitIssueRequest() {
+      if (!clerkToken || clerkToken === 'undefined') {
+        alert('You must sign in to the counter desk before submitting requests.');
+        checkClerkAuth();
+        return;
+      }
+
+      const name = document.getElementById('issueFullName').value.trim();
+      const dob = document.getElementById('issueDob').value;
+      const credType = document.getElementById('issueCredType').value;
+      const natId = document.getElementById('issueNatId').value.trim();
+      const authority = document.getElementById('issueAuthority').value.trim();
+      const serial = document.getElementById('issueSerial').value.trim();
+
+      if (!name || !dob || !natId || !authority || !serial) {
+        alert('Please complete all mandatory claimant fields (*).');
+        return;
+      }
+
+      if (activeChannel === 'hard') {
+        const c1 = document.getElementById('chk1').checked;
+        const c2 = document.getElementById('chk2').checked;
+        const c3 = document.getElementById('chk3').checked;
+        const c4 = document.getElementById('chk4').checked;
+        const obs = document.getElementById('hardObservations').value.trim();
+
+        if (!c1 || !c2 || !c3 || !c4) {
+          alert('Physical Document Inspection Checklist incomplete: All 4 checkpoints are mandatory.');
+          return;
+        }
+        if (!obs) {
+          alert('Inspector observations are required.');
+          return;
+        }
+      } else {
+        if (!softComputedHash || softComputedHash.length !== 64) {
+          alert('Please select a digital scan file to compute its SHA-256 digest.');
+          return;
+        }
+      }
+
+      const payload = {
+        submission_channel: activeChannel,
+        claimant_data: {
+          fullName: name,
+          dateOfBirth: dob,
+          credentialType: credType,
+          identifierNumber: natId,
+          issuingAuthority: authority,
+          documentSerial: serial
+        },
+        inspection_checklist: {
+          substrate_material_integrity: true,
+          optical_security_features: true,
+          biometric_face_match: true,
+          authority_seal_and_serial: true
+        },
+        evidence_sha256: activeChannel === 'soft' ? softComputedHash : null
+      };
+
+      const btn = document.getElementById('btnSubmitIssue');
+      btn.disabled = true;
+      btn.textContent = 'Submitting Request...';
+
+      try {
+        const res = await fetch('/api/portal/issue', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${clerkToken}`,
+            'X-Station-Id': sessionStorage.getItem('scatterid_clerk_station') || 'Counter-01'
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = 'Submit Credential Request →';
+
+        if (res.status === 401) {
+          alert('Session expired or unauthorized: ' + (data.message || data.error) + '. Please sign in again.');
+          doClerkLogout();
+          return;
+        }
+
+        if (!res.ok) {
+          alert('Submission failed: ' + (data.message || data.error));
+          return;
+        }
+
+        const reqId = data.requestId || `REQ-${Date.now().toString().slice(-8)}`;
+        document.getElementById('modalReqId').textContent = reqId;
+        document.getElementById('modalRoutingDesc').textContent = activeChannel === 'hard'
+          ? "Forwarded to Moderator Queue for direct verification & auto-issuance."
+          : "Forwarded to Moderator Queue. Root authorization required.";
+        
+        openModal('submissionModal');
+        resetIssueForm();
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = 'Submit Credential Request →';
+        alert('Network error: ' + e.message);
+      }
+    }
+
+    function resetIssueForm() {
+      document.getElementById('issueFullName').value = '';
+      document.getElementById('issueDob').value = '';
+      document.getElementById('issueNatId').value = '';
+      document.getElementById('issueAuthority').value = '';
+      document.getElementById('issueSerial').value = '';
+      document.getElementById('chk1').checked = false;
+      document.getElementById('chk2').checked = false;
+      document.getElementById('chk3').checked = false;
+      document.getElementById('chk4').checked = false;
+      document.getElementById('hardObservations').value = '';
+      const softFileEl = document.getElementById('softFile');
+      if (softFileEl) softFileEl.value = '';
+      const softDrop = document.getElementById('softDropText');
+      if (softDrop) softDrop.textContent = '📁 Click or Drag & Drop Document Scan';
+      const prev = document.getElementById('softHashPreview');
+      if (prev) prev.style.display = 'none';
+      softComputedHash = '';
+    }
+
+    // VERIFY DESK (§3.2)
+    function switchVerifyInput(type, btn) {
+      document.querySelectorAll('#desk-verify .desk-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('vinput-hash').style.display = type === 'hash' ? 'block' : 'none';
+      document.getElementById('vinput-file').style.display = type === 'file' ? 'block' : 'none';
+      document.getElementById('vinput-qr').style.display = type === 'qr' ? 'block' : 'none';
+      if (btn) btn.classList.add('active');
+    }
+
+    async function runImmediateVerification() {
+      const q = document.getElementById('verifyQueryInput').value.trim();
+      if (!q) {
+        alert('Enter credential UUID or SHA3-256 data hash.');
+        return;
+      }
+
+      const isHash = q.length === 64;
+      const payload = isHash ? { dataHash: q } : { credentialId: q };
+
+      try {
+        const res = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        const resGrid = document.getElementById('verifyResultsContainer');
+        const revAlert = document.getElementById('verifyRevokedAlert');
+
+        if (res.ok && data.status === 'anchored') {
+          resGrid.style.display = 'block';
+          revAlert.style.display = 'none';
+          document.getElementById('level1Hash').textContent = data.dataHash || '4a5e...';
+          document.getElementById('level2KeyId').textContent = data.publicKeyId || 'pqc-mldsa-root-v2';
+        } else if (data.status === 'revoked') {
+          resGrid.style.display = 'none';
+          revAlert.style.display = 'block';
+          document.getElementById('revokeAlertMsg').textContent = `Credential was revoked on ledger. Reason: ${data.message || 'Reported Lost'}`;
+        } else {
+          alert('Verification Failed: Record not registered on Hyperledger Fabric ledger.');
+        }
+      } catch(e) {
+        alert('Gateway probe failed: ' + e.message);
+      }
+    }
+
+    // REVOKE DESK (§3.3)
+    function openRevokeConfirmModal() {
+      const credId = document.getElementById('revokeTargetId').value.trim();
+      if (!credId) {
+        alert('Target Credential ID is required.');
+        return;
+      }
+      document.getElementById('revokeModalTarget').textContent = credId;
+      openModal('revokeModal');
+    }
+
+    async function executeRevocationSubmit() {
+      if (!clerkToken || clerkToken === 'undefined') {
+        alert('You must sign in to the counter desk before submitting requests.');
+        closeModal('revokeModal');
+        checkClerkAuth();
+        return;
+      }
+
+      const credId = document.getElementById('revokeTargetId').value.trim();
+      const reason = document.getElementById('revokeReasonSel').value;
+      const channel = document.getElementById('revokeChannelSel').value;
+      const ref = document.getElementById('revokeDocketRef').value.trim();
+
+      try {
+        const res = await fetch('/api/portal/revoke', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${clerkToken}`,
+            'X-Station-Id': sessionStorage.getItem('scatterid_clerk_station') || 'Counter-01'
+          },
+          body: JSON.stringify({
+            credential_id: credId,
+            submission_channel: channel,
+            reason: `${reason} (Ref: ${ref})`
+          })
+        });
+        const data = await res.json();
+        closeModal('revokeModal');
+
+        if (res.status === 401) {
+          alert('Session expired or unauthorized. Please sign in again.');
+          doClerkLogout();
+          return;
+        }
+
+        if (res.ok) {
+          alert(`Revocation request ${data.requestId || 'submitted'} advanced to Root Awaiting Accept queue.`);
+          document.getElementById('revokeTargetId').value = '';
+          document.getElementById('revokeDocketRef').value = '';
+        } else {
+          alert('Failed to submit revocation: ' + (data.message || data.error));
+        }
+      } catch(e) {
+        alert('Network error: ' + e.message);
+      }
+    }
+
+    // TRACKING MODAL (§3.4)
+    function openTrackingModal() {
+      openModal('trackingModal');
+    }
+
+    async function queryTrackModal() {
+      const id = document.getElementById('modalTrackInput').value.trim();
+      if (!id) return;
+
+      try {
+        const res = await fetch(`/api/portal/track/${encodeURIComponent(id)}`, {
+          headers: { 'Authorization': `Bearer ${clerkToken}` }
+        });
+        const data = await res.json();
+        if (res.status === 401) {
+          alert('Session expired or unauthorized. Please sign in again.');
+          closeModal('trackingModal');
+          doClerkLogout();
+          return;
+        }
+        if (!res.ok) {
+          alert('Request not found.');
+          return;
+        }
+
+        const r = data.request;
+        document.getElementById('modalTrackResult').style.display = 'block';
+        document.getElementById('trackStatusBadge').textContent = r.status;
+        document.getElementById('trackChannelBadge').textContent = r.submission_channel.toUpperCase();
+        document.getElementById('trackStationText').textContent = `${r.clerk_username || 'clerk'} @ ${r.station_id || 'counter'}`;
+
+        const isExecuted = r.status === 'EXECUTED' || r.status === 'EXECUTED_ON_LEDGER';
+        const isPending = r.status === 'PENDING';
+        const isAwaitingRoot = r.status === 'AWAITING_ROOT';
+
+        document.getElementById('st1').className = 'step-item completed';
+        document.getElementById('st2').className = isPending ? 'step-item active' : 'step-item completed';
+        document.getElementById('st3').className = isAwaitingRoot ? 'step-item active' : (isExecuted ? 'step-item completed' : 'step-item');
+        document.getElementById('st4').className = isExecuted ? 'step-item completed' : 'step-item';
+      } catch(e) {}
+    }
+
+    // CLERK SECURITY (§3.5)
+    async function saveClerkPassword() {
+      const cur = document.getElementById('secCurrentPass').value;
+      const p1 = document.getElementById('secNewPass').value;
+      const p2 = document.getElementById('secConfirmPass').value;
+
+      if (!cur) {
+        alert('Please enter your current password.');
+        return;
+      }
+      if (!p1 || p1.length < 10) {
+        alert('New permanent password must be at least 10 characters.');
+        return;
+      }
+      if (p1 !== p2) {
+        alert('New passwords do not match.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/portal/reset-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${clerkToken}`
+          },
+          body: JSON.stringify({
+            currentPassword: cur,
+            newPassword: p1
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('Password updated successfully!');
+          closeModal('securityModal');
+          document.getElementById('secCurrentPass').value = '';
+          document.getElementById('secNewPass').value = '';
+          document.getElementById('secConfirmPass').value = '';
+        } else {
+          alert('Failed to update password: ' + (data.message || data.error));
+        }
+      } catch(e) {
+        alert('Network error: ' + e.message);
+      }
+    }
+
+    // MODAL HELPERS
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function copyModalReqId() {
+      const id = document.getElementById('modalReqId').textContent;
+      navigator.clipboard.writeText(id).then(() => alert('Copied ' + id));
+    }
+    function openSecurityModal() { openModal('securityModal'); }
+  </script>
+</body>
+</html>
