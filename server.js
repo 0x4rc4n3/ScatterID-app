@@ -366,6 +366,46 @@ app.get('/api/portal/track/:id', async (req, res) => {
   }
 });
 
+// Help Desk Password Reset Proxy
+app.post('/api/portal/reset-password', async (req, res) => {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (req.headers.authorization) headers['Authorization'] = req.headers.authorization;
+
+    const response = await fetch(`${OPS_DASHBOARD_URL}/api/auth/reset-password`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(502).json({
+      error: `Failed to reset password: ${err.message}`,
+      opsDashboardUrl: OPS_DASHBOARD_URL
+    });
+  }
+});
+
+// Help Desk User Profile / Session Verification Proxy
+app.get('/api/portal/me', async (req, res) => {
+  try {
+    const headers = {};
+    if (req.headers.authorization) headers['Authorization'] = req.headers.authorization;
+
+    const response = await fetch(`${OPS_DASHBOARD_URL}/api/auth/me`, {
+      headers
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(502).json({
+      error: `Failed to verify session: ${err.message}`,
+      opsDashboardUrl: OPS_DASHBOARD_URL
+    });
+  }
+});
+
 const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isDirectRun && process.env.NODE_ENV !== 'test') {
