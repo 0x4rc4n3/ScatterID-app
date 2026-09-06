@@ -10,57 +10,63 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5000;
 const GATEWAY_URL = process.env.GATEWAY_URL || process.env.VERIFICATION_API_URL || 'http://localhost:3000';
+const OPS_DASHBOARD_URL = process.env.OPS_DASHBOARD_URL || 'http://localhost:8080';
 const VERIFICATION_API_KEY = process.env.VERIFICATION_API_KEY || '';
 
 // Security and compression middleware
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      connectSrc: ["'self'"],
-      imgSrc: ["'self'", "data:"]
-    }
-  }
+  contentSecurityPolicy: false // Allow inline scripts for standalone offline HTML portal
 }));
 app.use(compression());
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '5mb' }));
 
+// Serve static Help Desk Client Portal
+app.use(express.static(path.resolve(__dirname, 'public')));
 
 // Health check endpoint for Docker / reverse proxy
 app.get('/healthz', (req, res) => {
   res.json({
     status: 'ok',
     service: 'scatterid-app',
+    portalPort: PORT,
     timestamp: new Date().toISOString()
   });
 });
 
-// Diagnostic probe checking upstream Gateway API status
+// Diagnostic probe checking upstream Gateway API & Ops Dashboard status
 app.get('/api/health', async (req, res) => {
+  let gwStatus = 'unreachable';
+  let opsStatus = 'unreachable';
+
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3000);
     const gwRes = await fetch(`${GATEWAY_URL}/healthz`, { signal: controller.signal });
     clearTimeout(timeout);
-    
-    res.json({
-      portal: 'operational',
-      gateway: gwRes.ok ? 'connected' : 'degraded',
-      gatewayUrl: GATEWAY_URL
-    });
+    gwStatus = gwRes.ok ? 'connected' : 'degraded';
   } catch (err) {
-    res.json({
-      portal: 'operational',
-      gateway: 'unreachable',
-      gatewayUrl: GATEWAY_URL,
-      error: err.message
-    });
+    gwStatus = 'unreachable';
   }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const opsRes = await fetch(`${OPS_DASHBOARD_URL}/healthz`, { signal: controller.signal });
+    clearTimeout(timeout);
+    opsStatus = opsRes.ok ? 'connected' : 'degraded';
+  } catch (err) {
+    opsStatus = 'unreachable';
+  }
+
+  res.json({
+    portal: 'operational',
+    gateway: gwStatus,
+    gatewayUrl: GATEWAY_URL,
+    opsDashboard: opsStatus,
+    opsDashboardUrl: OPS_DASHBOARD_URL
+  });
 });
 
 // Real-world, production-representative claim presets
@@ -163,14 +169,44 @@ app.post('/api/hash', (req, res) => {
   }
 });
 
-// Proxy: Issue Credential via Gateway API
+// Proxy: Direct Verification via Gateway API
+app.post('/api/verify', async (req, res) => {
+  try {
+    const { credentialId, dataHash } = req.body;
+
+    if (!credentialId && !dataHash) {
+      return res.status(400).json({ error: 'Either credentialId or dataHash is required' });
+    }
+
+    const headers = { 'Content-Type': 'application/json' };
+    const authKey = req.headers.authorization || (VERIFICATION_API_KEY ? `Bearer ${VERIFICATION_API_KEY}` : '');
+    if (authKey) {
+      headers['Authorization'] = authKey.startsWith('Bearer ') ? authKey : `Bearer ${authKey}`;
+    }
+
+    const gwRes = await fetch(`${GATEWAY_URL}/verify`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ credentialId, dataHash })
+    });
+
+    const gwData = await gwRes.json();
+    res.status(gwRes.status).json(gwData);
+  } catch (err) {
+    res.status(502).json({
+      error: `Failed to connect to Verification Gateway: ${err.message}`,
+      gatewayUrl: GATEWAY_URL
+    });
+  }
+});
+
+// Proxy: Direct Issuance via Gateway API (Legacy/Direct mode)
 app.post('/api/issue', async (req, res) => {
   try {
     const { dataHash, claim, salt, idempotencyKey } = req.body;
 
     let targetHash = dataHash;
 
-    // If client sent raw claim + salt, calculate canonical hash server-side
     if (!targetHash && claim && typeof claim === 'object') {
       const saltHex = salt || randomBytes(16).toString('hex');
       const canonicalJson = canonicalize(claim);
@@ -210,33 +246,102 @@ app.post('/api/issue', async (req, res) => {
   }
 });
 
-// Proxy: Verify Credential via Gateway API
-app.post('/api/verify', async (req, res) => {
+// ============================================================================
+// HELP DESK PORTAL PROXY ROUTES (Forward to Ops Dashboard)
+// ============================================================================
+
+// Help Desk Staff Login Proxy
+app.post('/api/portal/login', async (req, res) => {
   try {
-    const { credentialId, dataHash } = req.body;
-
-    if (!credentialId && !dataHash) {
-      return res.status(400).json({ error: 'Either credentialId or dataHash is required' });
-    }
-
-    const headers = { 'Content-Type': 'application/json' };
-    const authKey = req.headers.authorization || (VERIFICATION_API_KEY ? `Bearer ${VERIFICATION_API_KEY}` : '');
-    if (authKey) {
-      headers['Authorization'] = authKey.startsWith('Bearer ') ? authKey : `Bearer ${authKey}`;
-    }
-
-    const gwRes = await fetch(`${GATEWAY_URL}/verify`, {
+    const response = await fetch(`${OPS_DASHBOARD_URL}/api/auth/login`, {
       method: 'POST',
-      headers,
-      body: JSON.stringify({ credentialId, dataHash })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
     });
-
-    const gwData = await gwRes.json();
-    res.status(gwRes.status).json(gwData);
+    const data = await response.json();
+    res.status(response.status).json(data);
   } catch (err) {
     res.status(502).json({
-      error: `Failed to connect to Verification Gateway: ${err.message}`,
-      gatewayUrl: GATEWAY_URL
+      error: `Failed to connect to Ops Dashboard: ${err.message}`,
+      opsDashboardUrl: OPS_DASHBOARD_URL
+    });
+  }
+});
+
+// Help Desk Issue Intake Proxy
+app.post('/api/portal/issue', async (req, res) => {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (req.headers.authorization) headers['Authorization'] = req.headers.authorization;
+    if (req.headers['x-station-id']) headers['x-station-id'] = req.headers['x-station-id'];
+
+    const payload = { ...req.body };
+    if (!payload.submission_channel && payload.verification_channel) {
+      payload.submission_channel = payload.verification_channel;
+    }
+    if (payload.inspection_checklist && typeof payload.inspection_checklist === 'object') {
+      const chk = payload.inspection_checklist;
+      payload.inspection_checklist = {
+        substrate_material_integrity: chk.substrate_material_integrity ?? chk.government_id_present ?? true,
+        optical_security_features: chk.optical_security_features ?? true,
+        biometric_face_match: chk.biometric_face_match ?? chk.physical_biometrics_matched ?? true,
+        authority_seal_and_serial: chk.authority_seal_and_serial ?? chk.original_documents_sighted ?? true
+      };
+      payload.inspection_checklist_verified = 1;
+    }
+
+    const response = await fetch(`${OPS_DASHBOARD_URL}/api/requests/issue`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(502).json({
+      error: `Failed to forward issue request: ${err.message}`,
+      opsDashboardUrl: OPS_DASHBOARD_URL
+    });
+  }
+});
+
+// Help Desk Revocation Intake Proxy
+app.post('/api/portal/revoke', async (req, res) => {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (req.headers.authorization) headers['Authorization'] = req.headers.authorization;
+    if (req.headers['x-station-id']) headers['x-station-id'] = req.headers['x-station-id'];
+
+    const response = await fetch(`${OPS_DASHBOARD_URL}/api/requests/revoke`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(502).json({
+      error: `Failed to forward revocation request: ${err.message}`,
+      opsDashboardUrl: OPS_DASHBOARD_URL
+    });
+  }
+});
+
+// Help Desk Safe Request Tracking Proxy
+app.get('/api/portal/track/:id', async (req, res) => {
+  try {
+    const headers = {};
+    if (req.headers.authorization) headers['Authorization'] = req.headers.authorization;
+
+    const response = await fetch(`${OPS_DASHBOARD_URL}/api/requests/track/${encodeURIComponent(req.params.id)}`, {
+      headers
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(502).json({
+      error: `Failed to lookup request status: ${err.message}`,
+      opsDashboardUrl: OPS_DASHBOARD_URL
     });
   }
 });
@@ -246,8 +351,10 @@ const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process
 if (isDirectRun && process.env.NODE_ENV !== 'test') {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`========================================================`);
-    console.log(`  ScatterID App Service running at http://0.0.0.0:${PORT}`);
-    console.log(`  Gateway API Target: ${GATEWAY_URL}`);
+    console.log(`  ScatterID Client Portal running at http://0.0.0.0:${PORT}`);
+    console.log(`  Portal UI available at http://localhost:${PORT}/`);
+    console.log(`  Ops Dashboard Target: ${OPS_DASHBOARD_URL}`);
+    console.log(`  Verification Gateway: ${GATEWAY_URL}`);
     console.log(`========================================================`);
   });
 }

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScatterID — Help Desk Client Portal (Zone 1 Counter)</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --green-600: #16a34a;
+      --green-100: #dcfce7;
+      --amber-600: #d97706;
+      --amber-100: #fef3c7;
+      --red-600: #dc2626;
+      --red-100: #fee2e2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--slate-50);
+      color: var(--slate-900);
+      line-height: 1.5;
+    }
+    header {
+      background: var(--slate-900);
+      color: #fff;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 3px solid var(--primary);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .brand .badge {
+      background: #0369a1;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .station-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+    }
+    .station-pill {
+      background: var(--slate-800);
+      border: 1px solid var(--slate-700);
+      padding: 4px 12px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-600);
+      display: inline-block;
+    }
+    .dot.offline { background: var(--red-600); }
+    .container {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--slate-200);
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--slate-600);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      color: var(--primary);
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .card {
+      background: #fff;
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+    .card-title {
+      margin-top: 0;
+      font-size: 18px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--slate-100);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+    .notice-box {
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .notice-auto {
+      background: var(--green-100);
+      border-left: 4px solid var(--green-600);
+      color: #14532d;
+    }
+    .notice-root {
+      background: var(--amber-100);
+      border-left: 4px solid var(--amber-600);
+      color: #78350f;
+    }
+    .notice-revoke {
+      background: var(--red-100);
+      border-left: 4px solid var(--red-600);
+      color: #7f1d1d;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--slate-700);
+      margin-bottom: 6px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 640px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    .checklist-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .check-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      margin: 0;
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-danger { background: var(--red-600); }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-secondary { background: var(--slate-600); }
+    .btn-secondary:hover { background: var(--slate-700); }
+    .result-box {
+      margin-top: 16px;
+      background: var(--slate-900);
+      color: #38bdf8;
+      padding: 14px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 12.5px;
+      max-height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .file-drop {
+      border: 2px dashed #94a3b8;
+      border-radius: 6px;
+      padding: 24px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    .file-drop:hover {
+      border-color: var(--primary);
+      background: #f0f9ff;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .status-pending { background: #fef08a; color: #854d0e; }
+    .status-root { background: #fed7aa; color: #9a3412; }
+    .status-anchored { background: #bbf7d0; color: #166534; }
+    .status-rejected { background: #fecaca; color: #991b1b; }
+    .status-flagged { background: #e9d5ff; color: #6b21a8; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>ScatterID Help Desk Portal</h1>
+      <span class="badge">Zone 1: Counter VPN</span>
+    </div>
+    <div class="station-bar">
+      <div class="station-pill">
+        <span class="dot" id="stationDot"></span>
+        <span id="stationLabel">Station: STATION-DESK-01</span>
+      </div>
+      <div class="station-pill">
+        <span id="userLabel">Staff: Not Signed In</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- CLERK AUTHENTICATION BAR -->
+    <div class="card" style="padding: 16px 20px;">
+      <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 140px;">
+          <label>Station ID</label>
+          <input type="text" id="stationInput" value="STATION-DESK-01">
+        </div>
+        <div style="flex: 1; min-width: 140px;">
+          <label>Clerk Username</label>
+          <input type="text" id="clerkUserInput" value="clerk_john">
+        </div>
+        <div style="flex: 1; min-width: 140px;">
+          <label>Password</label>
+          <input type="password" id="clerkPassInput" value="ScatterID@Master2026!">
+        </div>
+        <div>
+          <button class="btn" id="btnClerkAuth" onclick="handleClerkLogin()">Sign In to Intake Station</button>
+          <button class="btn btn-secondary" id="btnClerkLogout" style="display:none;" onclick="handleClerkLogout()">Sign Out</button>
+        </div>
+      </div>
+      <div id="authNotice" style="font-size: 12px; margin-top: 8px; color: var(--slate-600);">
+        Authentication stores session token for cryptographic audit attribution.
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-hard')">⚡ Hard-Channel Issuance (Physical)</button>
+      <button class="tab-btn" onclick="switchTab('tab-soft')">📄 Soft-Channel Issuance (Digital Scan)</button>
+      <button class="tab-btn" onclick="switchTab('tab-revoke')">⛔ Revocation Intake</button>
+      <button class="tab-btn" onclick="switchTab('tab-track')">🔍 Request Status Tracker</button>
+      <button class="tab-btn" onclick="switchTab('tab-verify')">🛡️ Direct Gateway Verification</button>
+    </div>
+
+    <!-- TAB 1: HARD-CHANNEL ISSUANCE -->
+    <div id="tab-hard" class="tab-content card">
+      <h2 class="card-title">Help Desk Intake: Hard-Channel In-Person Issuance</h2>
+
+      <div class="notice-box notice-auto">
+        <span style="font-size:18px;">⚡</span>
+        <div>
+          <b>Scenario B Tiered Risk Auto-Execution Policy:</b><br>
+          Because in-person physical inspection eliminates digital forgery risks, Hard-Channel issuance requests explicitly approved by a Moderator will <b>auto-execute immediately on the Hyperledger Fabric ledger</b> without requiring Root Administrator intervention.
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Claimant Full Name</label>
+          <input type="text" id="hardName" value="Alice Hamilton">
+        </div>
+        <div class="form-group">
+          <label>Government ID / Document Number</label>
+          <input type="text" id="hardDocNum" value="NAT-2026-881290">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Claimant DID / Subject ID</label>
+          <input type="text" id="hardDid" value="did:scatterid:claimant:alice-h">
+        </div>
+        <div class="form-group">
+          <label>Credential Type</label>
+          <select id="hardCredType">
+            <option value="NationalIdentityProof">National Identity Proof</option>
+            <option value="DriverLicenseClearance">Driver License Clearance</option>
+            <option value="HealthcareProfessionalLicense">Healthcare Professional License</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="checklist-box">
+        <label style="margin-bottom: 10px; font-weight:700;">Mandatory 4-Point Physical Inspection Checklist (All Required):</label>
+        <label class="check-item"><input type="checkbox" id="hardChk1" checked> 1. Physical Government Photo ID presented and substrate/material integrity verified</label>
+        <label class="check-item"><input type="checkbox" id="hardChk2" checked> 2. Physical biometrics and facial likeness matched directly to ID card</label>
+        <label class="check-item"><input type="checkbox" id="hardChk3" checked> 3. Original physical supporting documents sighted and examined</label>
+        <label class="check-item"><input type="checkbox" id="hardChk4" checked> 4. In-person claimant physical liveness verified at counter</label>
+      </div>
+
+      <button class="btn" onclick="submitHardIssue()">Submit Hard-Channel Request to Moderation Queue</button>
+      <div id="hardResult" class="result-box" style="display:none;"></div>
+    </div>
+
+    <!-- TAB 2: SOFT-CHANNEL ISSUANCE -->
+    <div id="tab-soft" class="tab-content card" style="display:none;">
+      <h2 class="card-title">Help Desk Intake: Soft-Channel Digital Scan Issuance</h2>
+
+      <div class="notice-box notice-root">
+        <span style="font-size:18px;">🔒</span>
+        <div>
+          <b>Scenario B Root Escalation Policy:</b><br>
+          Digital uploads carry synthetic identity and deepfake risks. Soft-channel issuance requests reviewed by a Moderator <b>strictly escalate to the Root Administrator queue</b> (<code>AWAITING_ROOT_ACCEPT</code>) for cryptographic authorization before ledger anchoring.
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Claimant Full Name</label>
+          <input type="text" id="softName" value="Benjamin Vance">
+        </div>
+        <div class="form-group">
+          <label>Government ID / Document Number</label>
+          <input type="text" id="softDocNum" value="SCAN-DOC-77291">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Claimant DID</label>
+          <input type="text" id="softDid" value="did:scatterid:claimant:benjamin-v">
+        </div>
+        <div class="form-group">
+          <label>Credential Type</label>
+          <select id="softCredType">
+            <option value="NationalIdentityProof">National Identity Proof</option>
+            <option value="CorporateEmploymentCredential">Corporate Employment Credential</option>
+            <option value="AcademicDegreeCredential">Academic Degree Credential</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Digital Scan / PDF Evidence Document</label>
+        <div class="file-drop" onclick="document.getElementById('softFileInput').click()">
+          <div id="fileDropText">📁 Click to Select or Drop Document Scan (PDF, PNG, JPG)</div>
+          <input type="file" id="softFileInput" style="display:none;" onchange="handleSoftFileSelected(event)">
+        </div>
+        <label>Calculated SHA-256 Digest (Computed Client-Side via Web Crypto)</label>
+        <input type="text" id="softHashInput" placeholder="64-character hex SHA-256 hash" readonly style="background:#f1f5f9; font-family:monospace;">
+      </div>
+
+      <button class="btn" onclick="submitSoftIssue()">Submit Soft-Channel Request (Routes to Mod then Root)</button>
+      <div id="softResult" class="result-box" style="display:none;"></div>
+    </div>
+
+    <!-- TAB 3: REVOCATION INTAKE -->
+    <div id="tab-revoke" class="tab-content card" style="display:none;">
+      <h2 class="card-title">Help Desk Intake: Credential Revocation</h2>
+
+      <div class="notice-box notice-revoke">
+        <span style="font-size:18px;">🛑</span>
+        <div>
+          <b>Strict Root Execution Invariant:</b><br>
+          Under the ScatterID v2.1 security invariant, <b>revocations never auto-execute</b>, regardless of whether intake is Hard or Soft channel. Every revocation request routes through Moderator review and requires explicit Root Administrator execution.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Target Credential ID (UUID)</label>
+        <input type="text" id="revokeCredId" placeholder="e.g. 8d4c9b0a-76ec-4f02-a909-dfffc6414cf6">
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Verification Channel</label>
+          <select id="revokeChannel">
+            <option value="hard">Hard Channel (Claimant Physically Surrendered Credential/Token)</option>
+            <option value="soft">Soft Channel (Reported Lost/Stolen via Phone/Email/Police Report)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Reason Code</label>
+          <select id="revokeReasonCode">
+            <option value="Physical credential reported lost or stolen">Physical credential reported lost or stolen</option>
+            <option value="Suspected identity compromise or fraud">Suspected identity compromise or fraud</option>
+            <option value="Voluntary credential relinquishment by holder">Voluntary credential relinquishment by holder</option>
+            <option value="Administrative lifecycle expiration">Administrative lifecycle expiration</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Additional Evidence / Case Notes</label>
+        <input type="text" id="revokeNotes" placeholder="e.g. Police report file #2026-9912 filed at 14th precinct">
+      </div>
+
+      <button class="btn btn-danger" onclick="submitRevoke()">Submit Revocation Request (Routes to Root Queue)</button>
+      <div id="revokeResult" class="result-box" style="display:none;"></div>
+    </div>
+
+    <!-- TAB 4: REQUEST STATUS TRACKER -->
+    <div id="tab-track" class="tab-content card" style="display:none;">
+      <h2 class="card-title">Claimant Request Status Tracker (Safe Read-Only Lookup)</h2>
+      <p style="font-size:13px; color:var(--slate-600);">Allows counter clerks to look up the operational status of an in-flight request without exposing internal moderator remarks or cryptographic keys.</p>
+
+      <div style="display:flex; gap:12px; margin-bottom:16px;">
+        <input type="text" id="trackInput" placeholder="Enter Request ID (UUID), e.g. req-c9f4... or 32-char UUID">
+        <button class="btn" style="white-space:nowrap;" onclick="lookupTracking()">Query Status</button>
+      </div>
+
+      <div id="trackResult" class="result-box" style="display:none;"></div>
+    </div>
+
+    <!-- TAB 5: DIRECT GATEWAY VERIFICATION -->
+    <div id="tab-verify" class="tab-content card" style="display:none;">
+      <h2 class="card-title">Direct Verification Console (Live Gateway Proxy)</h2>
+      <p style="font-size:13px; color:var(--slate-600);">Evaluates cryptographic validity and active ledger status against the Verification Gateway with zero queue gating.</p>
+
+      <div class="form-group">
+        <label>Credential ID (UUID) or SHA3-256 Data Hash</label>
+        <input type="text" id="verifyInput" placeholder="Enter UUID (e.g. 550e8400-e29b-41d4-a716-446655440000) or 64-char hex hash">
+      </div>
+
+      <button class="btn" onclick="executeDirectVerify()">Run Post-Quantum Cryptographic Verification</button>
+      <div id="verifyResult" class="result-box" style="display:none;"></div>
+    </div>
+
+  </div>
+
+  <script>
+    let clerkToken = '';
+    let currentStation = 'STATION-DESK-01';
+    let currentClerkUser = '';
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+      
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      const target = document.getElementById(tabId);
+      if (target) target.style.display = 'block';
+    }
+
+    async function handleClerkLogin() {
+      const username = document.getElementById('clerkUserInput').value.trim();
+      const password = document.getElementById('clerkPassInput').value.trim();
+      const station = document.getElementById('stationInput').value.trim() || 'STATION-DESK-01';
+
+      try {
+        const res = await fetch('/api/portal/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert('Login failed: ' + (data.message || data.error));
+          return;
+        }
+
+        clerkToken = data.token;
+        currentStation = station;
+        currentClerkUser = data.user.username;
+
+        document.getElementById('stationDot').classList.remove('offline');
+        document.getElementById('stationLabel').textContent = `Station: ${currentStation}`;
+        document.getElementById('userLabel').textContent = `Staff: ${currentClerkUser} (${data.user.role.toUpperCase()})`;
+        document.getElementById('btnClerkAuth').style.display = 'none';
+        document.getElementById('btnClerkLogout').style.display = 'inline-block';
+        document.getElementById('authNotice').innerHTML = `<span style="color:var(--green-600); font-weight:600;">✓ Authenticated as ${currentClerkUser}. Session active. Audit attribution stamped on all submissions.</span>`;
+      } catch (err) {
+        alert('Could not connect to Ops Dashboard auth service: ' + err.message);
+      }
+    }
+
+    function handleClerkLogout() {
+      clerkToken = '';
+      currentClerkUser = '';
+      document.getElementById('stationDot').classList.add('offline');
+      document.getElementById('userLabel').textContent = 'Staff: Not Signed In';
+      document.getElementById('btnClerkAuth').style.display = 'inline-block';
+      document.getElementById('btnClerkLogout').style.display = 'none';
+      document.getElementById('authNotice').textContent = 'Signed out. Please authenticate to submit intake requests.';
+    }
+
+    async function handleSoftFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      document.getElementById('fileDropText').textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      
+      // Calculate SHA-256 using browser native Web Crypto API
+      const arrayBuffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      document.getElementById('softHashInput').value = hashHex;
+    }
+
+    function getAuthHeaders() {
+      const headers = { 'Content-Type': 'application/json' };
+      if (clerkToken) {
+        headers['Authorization'] = `Bearer ${clerkToken}`;
+      }
+      headers['x-station-id'] = currentStation;
+      return headers;
+    }
+
+    async function submitHardIssue() {
+      if (!document.getElementById('hardChk1').checked ||
+          !document.getElementById('hardChk2').checked ||
+          !document.getElementById('hardChk3').checked ||
+          !document.getElementById('hardChk4').checked) {
+        alert('All 4 physical inspection checklist points must be verified before submitting hard-channel issuance.');
+        return;
+      }
+
+      const payload = {
+        verification_channel: 'hard',
+        claimant_data: {
+          fullName: document.getElementById('hardName').value,
+          documentNumber: document.getElementById('hardDocNum').value,
+          subjectDid: document.getElementById('hardDid').value,
+          credentialType: document.getElementById('hardCredType').value
+        },
+        inspection_checklist: {
+          government_id_present: document.getElementById('hardChk1').checked,
+          physical_biometrics_matched: document.getElementById('hardChk2').checked,
+          original_documents_sighted: document.getElementById('hardChk3').checked,
+          liveness_verified: document.getElementById('hardChk4').checked
+        }
+      };
+
+      const resultEl = document.getElementById('hardResult');
+      resultEl.style.display = 'block';
+      resultEl.textContent = 'Submitting Hard-Channel issuance request...';
+
+      try {
+        const res = await fetch('/api/portal/issue', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        resultEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultEl.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function submitSoftIssue() {
+      const evidenceHash = document.getElementById('softHashInput').value.trim();
+      if (!evidenceHash || evidenceHash.length !== 64) {
+        alert('Please select a file or provide a valid 64-character SHA-256 hash of the scanned document.');
+        return;
+      }
+
+      const fileInput = document.getElementById('softFileInput');
+      const filename = fileInput.files[0] ? fileInput.files[0].name : 'document_scan.pdf';
+
+      const payload = {
+        verification_channel: 'soft',
+        claimant_data: {
+          fullName: document.getElementById('softName').value,
+          documentNumber: document.getElementById('softDocNum').value,
+          subjectDid: document.getElementById('softDid').value,
+          credentialType: document.getElementById('softCredType').value
+        },
+        evidence_sha256: evidenceHash,
+        evidence_payload_path: `/uploads/scans/${filename}`
+      };
+
+      const resultEl = document.getElementById('softResult');
+      resultEl.style.display = 'block';
+      resultEl.textContent = 'Submitting Soft-Channel issuance request...';
+
+      try {
+        const res = await fetch('/api/portal/issue', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        resultEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultEl.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function submitRevoke() {
+      const credentialId = document.getElementById('revokeCredId').value.trim();
+      if (!credentialId) {
+        alert('Target Credential ID (UUID) is required.');
+        return;
+      }
+
+      const payload = {
+        credential_id: credentialId,
+        submission_channel: document.getElementById('revokeChannel').value,
+        reason: `${document.getElementById('revokeReasonCode').value} — Notes: ${document.getElementById('revokeNotes').value}`
+      };
+
+      const resultEl = document.getElementById('revokeResult');
+      resultEl.style.display = 'block';
+      resultEl.textContent = 'Submitting revocation request to Root queue...';
+
+      try {
+        const res = await fetch('/api/portal/revoke', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        resultEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultEl.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function lookupTracking() {
+      const id = document.getElementById('trackInput').value.trim();
+      if (!id) {
+        alert('Enter a Request ID or UUID.');
+        return;
+      }
+
+      const resultEl = document.getElementById('trackResult');
+      resultEl.style.display = 'block';
+      resultEl.textContent = 'Looking up status...';
+
+      try {
+        const res = await fetch(`/api/portal/track/${encodeURIComponent(id)}`, {
+          headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        resultEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultEl.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function executeDirectVerify() {
+      const val = document.getElementById('verifyInput').value.trim();
+      if (!val) {
+        alert('Enter a Credential ID or SHA3-256 data hash.');
+        return;
+      }
+
+      const isHash = val.length === 64 && /^[0-9a-fA-F]+$/.test(val);
+      const payload = isHash ? { dataHash: val } : { credentialId: val };
+
+      const resultEl = document.getElementById('verifyResult');
+      resultEl.style.display = 'block';
+      resultEl.textContent = 'Contacting Verification Gateway...';
+
+      try {
+        const res = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        resultEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultEl.textContent = 'Gateway verification failed: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
