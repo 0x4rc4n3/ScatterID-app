@@ -69,61 +69,60 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
-// Real-world, production-representative claim presets
+// Production-representative ScatterID claim presets
 const SAMPLE_PRESETS = [
   {
-    id: 'kyc-identity',
-    title: 'Government National ID & Proof of Age',
-    description: 'Enables mathematical age verification (e.g., 21+) without revealing name, exact birthdate, or ID number.',
+    id: 'identity-record',
+    title: 'ScatterID National Civil Registry Record',
+    description: 'Enables mathematical identity attestation without revealing full name, exact birthdate, or private civil registry numbers.',
     claim: {
-      credentialType: 'NationalIdentityProof',
-      subject: 'did:scatterid:user:8f92a10c',
+      credentialType: 'CivilIdentityAttestation',
+      subject: 'did:scatterid:record:8f92a10c',
       fullName: 'Alice M. Chen',
-      dateOfBirth: '1996-04-12',
-      citizenship: 'CAN',
+      identifierNumber: 'REC-9920148-X',
       issuingAuthority: 'Federal Civil Identity Registry',
-      documentNumber: 'ID-9920148-X'
+      effectiveYear: 2026
     }
   },
   {
     id: 'healthcare-clearance',
-    title: 'Post-Quantum Healthcare Practitioner Credential',
-    description: 'Validates hospital surgical privileges and state medical licensing without leaking personal practitioner files.',
+    title: 'ScatterID Professional Practitioner Clearance',
+    description: 'Validates professional surgical privileges and institutional licensing without leaking confidential files.',
     claim: {
-      credentialType: 'MedicalLicenseClearance',
-      subject: 'did:scatterid:user:dr-martinez',
-      practitionerName: 'Dr. Sofia Martinez, MD',
-      licenseNumber: 'MED-NY-448201',
+      credentialType: 'ProfessionalClearanceRecord',
+      subject: 'did:scatterid:record:dr-martinez',
+      practitionerName: 'Dr. Sofia Martinez',
+      licenseNumber: 'PR-448201',
       specialty: 'Trauma Surgery',
       licenseStatus: 'Active & Unrestricted',
-      jurisdiction: 'US-NY'
+      jurisdiction: 'National Medical Registry'
     }
   },
   {
     id: 'fintech-investor',
-    title: 'Institutional Accredited Investor Proof',
-    description: 'Proves qualified institutional buyer (QIB) accreditation status to financial venues with zero net-worth disclosure.',
+    title: 'ScatterID Institutional Status Assertion',
+    description: 'Proves qualified institutional entity status with zero sensitive financial asset disclosure.',
     claim: {
-      credentialType: 'AccreditedInvestorStatus',
-      subject: 'did:scatterid:entity:apex-holdings',
+      credentialType: 'InstitutionalStatusRecord',
+      subject: 'did:scatterid:record:apex-holdings',
       entityName: 'Apex Capital Partners LLC',
-      accreditationTier: 'Rule 506(c) Qualified Purchaser',
-      jurisdiction: 'US-SEC',
+      accreditationTier: 'Tier-1 Institutional Authority',
+      jurisdiction: 'Financial Regulatory Council',
       regulatoryStatus: 'Compliant'
     }
   },
   {
-    id: 'academic-degree',
-    title: 'Cryptographic University Degree Verification',
-    description: 'Permanently anchors university academic honors to resist degree fraud while keeping transcripts private.',
+    id: 'certified-record',
+    title: 'ScatterID Verified Achievement & Competency Record',
+    description: 'Permanently anchors verified competency and credential records resisting forgery while keeping detailed archives private.',
     claim: {
-      credentialType: 'UniversityDegreeCredential',
-      subject: 'did:scatterid:student:k-okonkwo',
-      graduateName: 'Kelechi Okonkwo',
+      credentialType: 'VerifiedCompetencyRecord',
+      subject: 'did:scatterid:record:k-okonkwo',
+      subjectName: 'Kelechi Okonkwo',
       institution: 'Polytechnic Institute of Technology',
-      degree: 'Master of Science in Cybersecurity',
-      graduationYear: 2025,
-      honors: 'Summa Cum Laude'
+      recordTitle: 'Advanced Systems & Information Security',
+      issuanceYear: 2025,
+      classification: 'Distinction'
     }
   }
 ];

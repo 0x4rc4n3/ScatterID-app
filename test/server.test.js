@@ -37,7 +37,7 @@ test('GET /api/presets returns standard claim presets', async () => {
   const data = await res.json();
   assert.ok(Array.isArray(data.presets));
   assert.equal(data.presets.length, 4);
-  assert.equal(data.presets[0].id, 'kyc-identity');
+  assert.equal(data.presets[0].id, 'identity-record');
 });
 
 test('POST /api/hash computes canonical SHA3-256 hash', async () => {
