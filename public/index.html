@@ -3,1421 +3,1114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScatterID — Decentralized Attestation & Verification Portal</title>
-  <link rel="stylesheet" href="/scatterid-theme.css">
+  <title>ScatterID Help Desk & Client Portal</title>
   <style>
-    /* Specialized Portal Additions */
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    
-    .timeline-container {
+    :root {
+      --bg-slate-900: #0f172a;
+      --bg-slate-800: #1e293b;
+      --bg-slate-700: #334155;
+      --bg-slate-100: #f1f5f9;
+      --bg-slate-50: #f8fafc;
+      --border-slate-800: #1e293b;
+      --border-slate-200: #e2e8f0;
+      --text-slate-100: #f8fafc;
+      --text-slate-900: #0f172a;
+      --text-slate-600: #475569;
+      --text-slate-400: #94a3b8;
+
+      /* Flowbite Palettes (§4) */
+      --blue-primary: #1d4ed8;
+      --blue-hover: #1e40af;
+      --blue-accent-bg: rgba(239, 246, 255, 0.7);
+      --blue-accent-border: #2563eb;
+      
+      --amber-accent-bg: rgba(254, 243, 199, 0.7);
+      --amber-accent-border: #d97706;
+
+      --emerald-bg: #d1fae5;
+      --emerald-text: #065f46;
+      --emerald-border: #10b981;
+
+      --teal-bg: #ccfbf1;
+      --teal-text: #115e59;
+      --teal-border: #14b8a6;
+
+      --rose-bg: #ffe4e6;
+      --rose-text: #9f1239;
+      --rose-border: #f43f5e;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+      background-color: var(--bg-slate-50);
+      color: var(--text-slate-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Persistent Dark-Slate Header (§2) */
+    header.helpdesk-header {
+      background: var(--bg-slate-900);
+      color: var(--text-slate-100);
+      border-bottom: 1px solid var(--border-slate-800);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-logo span.badge-sq {
+      background: #0284c7;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .desk-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-slate-800);
+      padding: 3px;
+      border-radius: 6px;
+    }
+    .desk-tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-slate-400);
+      padding: 6px 14px;
+      font-size: 12.5px;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .desk-tab-btn:hover { color: #fff; }
+    .desk-tab-btn.active {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    .clerk-station-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+    .station-pill {
+      background: var(--bg-slate-800);
+      border: 1px solid var(--bg-slate-700);
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+    }
+
+    /* Container */
+    .portal-container {
+      max-width: 1040px;
+      margin: 28px auto;
+      padding: 0 20px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Flowbite Cards (§3) */
+    .flowbite-card {
+      background: #ffffff;
+      border: 1px solid var(--border-slate-200);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-slate-900);
+      margin-top: 0;
+      margin-bottom: 4px;
+    }
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-slate-600);
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    /* Channel Selector Cards (§3.1 Section 2) */
+    .channel-selector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+    @media (max-width: 768px) {
+      .channel-selector-grid { grid-template-columns: 1fr; }
+    }
+    .channel-card {
+      border: 2px solid var(--border-slate-200);
+      border-radius: 8px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: #ffffff;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .channel-card input[type="radio"] {
+      margin-top: 3px;
+      accent-color: #0284c7;
+      width: 18px;
+      height: 18px;
+    }
+    .channel-card.active-hard {
+      border-color: var(--blue-accent-border);
+      background: var(--blue-accent-bg);
+    }
+    .channel-card.active-soft {
+      border-color: var(--amber-accent-border);
+      background: var(--amber-accent-bg);
+    }
+    .channel-heading {
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+    .channel-subtext {
+      font-size: 12px;
+      color: var(--text-slate-600);
+    }
+
+    /* Forms & Inputs */
+    .form-group { margin-bottom: 16px; }
+    label.label-text {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-slate-700);
+      margin-bottom: 6px;
+    }
+    .req { color: #dc2626; font-weight: bold; margin-left: 2px; }
+    input[type="text"],
+    input[type="date"],
+    input[type="password"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border-slate-200);
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 768px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Checkbox Group (§3.1 Hard Channel) */
+    .checklist-container {
+      background: #f8fafc;
+      border: 1px solid var(--border-slate-200);
+      border-radius: 6px;
+      padding: 16px;
+      margin: 12px 0 16px 0;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      cursor: pointer;
+      accent-color: #0284c7;
+    }
+
+    /* File Drop Area (§3.1 Soft Channel) */
+    .file-dropzone {
+      border: 2px dashed #94a3b8;
+      border-radius: 6px;
+      padding: 24px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      margin: 12px 0;
+    }
+    .file-dropzone:hover {
+      border-color: #0284c7;
+      background: #f0f9ff;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-blue {
+      background: var(--blue-primary);
+      color: #ffffff;
+    }
+    .btn-blue:hover { background: var(--blue-hover); }
+    .btn-neutral {
+      background: #ffffff;
+      color: var(--text-slate-700);
+      border-color: var(--border-slate-200);
+    }
+    .btn-neutral:hover { background: #f1f5f9; }
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+    }
+    .btn-danger:hover { background: #b91c1c; }
+
+    /* Modals (§3.1, §3.4) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(3px);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-box {
+      background: #ffffff;
+      border-radius: 8px;
+      width: 520px;
+      max-width: 90vw;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      border: 1px solid var(--border-slate-200);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-slate-200);
       display: flex;
       justify-content: space-between;
-      position: relative;
-      margin: 28px 0 20px 0;
+      align-items: center;
     }
-    .timeline-container::before {
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 14px 20px;
+      background: #f8fafc;
+      border-top: 1px solid var(--border-slate-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Verification Cards Side-by-Side (§3.2) */
+    .verify-results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+    @media (max-width: 768px) {
+      .verify-results-grid { grid-template-columns: 1fr; }
+    }
+    .verify-badge-card {
+      border: 1px solid;
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .verify-badge-card.level1 {
+      background: var(--emerald-bg);
+      color: var(--emerald-text);
+      border-color: var(--emerald-border);
+    }
+    .verify-badge-card.level2 {
+      background: var(--teal-bg);
+      color: var(--teal-text);
+      border-color: var(--teal-border);
+    }
+    .verify-badge-card.revoked {
+      background: var(--rose-bg);
+      color: var(--rose-text);
+      border-color: var(--rose-border);
+    }
+
+    /* Tracking Stepper (§3.4) */
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+      position: relative;
+    }
+    .stepper::before {
       content: '';
       position: absolute;
-      top: 14px;
+      top: 12px;
       left: 20px;
       right: 20px;
       height: 2px;
-      background: var(--border-subtle);
+      background: #e2e8f0;
       z-index: 1;
     }
-    .timeline-step {
+    .step-item {
       position: relative;
       z-index: 2;
       text-align: center;
       flex: 1;
     }
-    .timeline-node {
-      width: 30px;
-      height: 30px;
+    .step-node {
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      background: var(--bg-surface);
-      border: 2px solid var(--border-subtle);
-      margin: 0 auto 8px auto;
+      background: #fff;
+      border: 2px solid #94a3b8;
+      margin: 0 auto 6px auto;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
       font-weight: 700;
-      color: var(--text-dim);
     }
-    .timeline-step.active .timeline-node {
-      border-color: var(--cyan-bright);
-      color: var(--cyan-bright);
-      background: var(--bg-input);
-      box-shadow: 0 0 10px var(--cyan-glow);
+    .step-item.completed .step-node {
+      border-color: #10b981;
+      background: #10b981;
+      color: #fff;
     }
-    .timeline-step.completed .timeline-node {
-      border-color: var(--emerald-bright);
-      background: var(--emerald-bright);
-      color: #04140e;
-      box-shadow: 0 0 10px var(--emerald-glow);
+    .step-item.active .step-node {
+      border-color: #2563eb;
+      color: #2563eb;
     }
-    .timeline-title {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--text-dim);
-    }
-    .timeline-step.active .timeline-title {
-      color: var(--cyan-bright);
-    }
-    .timeline-step.completed .timeline-title {
-      color: var(--emerald-bright);
-    }
+    .step-label { font-size: 11px; color: #64748b; font-weight: 600; }
+    .step-item.completed .step-label { color: #065f46; font-weight: 700; }
+    .step-item.active .step-label { color: #1e40af; font-weight: 700; }
 
-    .file-drop-area {
-      border: 2px dashed var(--border-medium);
-      border-radius: var(--radius-sm);
-      padding: 28px;
-      text-align: center;
-      background: rgba(10, 17, 32, 0.5);
-      cursor: pointer;
-      transition: all 0.2s ease;
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #0369a1;
     }
-    .file-drop-area:hover {
-      border-color: var(--cyan-bright);
-      background: rgba(0, 240, 255, 0.04);
-    }
-
-    .verification-card {
-      border-left: 4px solid var(--cyan-bright);
-    }
-    .verification-card.valid {
-      border-left-color: var(--emerald-bright);
-    }
-    .verification-card.revoked {
-      border-left-color: var(--rose-bright);
-    }
+    .desk-view { display: none; }
+    .desk-view.active { display: block; }
   </style>
 </head>
 <body>
-  <header class="app-header">
-    <div class="brand-wrapper">
-      <div class="brand-logo">S</div>
-      <div class="brand-info">
-        <h1>ScatterID Client Portal</h1>
-        <p>Post-Quantum Sovereign Identity & Credential Attestation Platform</p>
+
+  <!-- PERSISTENT GLOBAL HEADER (§2) -->
+  <header class="helpdesk-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <span class="badge-sq">S</span>
+        <span>ScatterID Help Desk</span>
       </div>
+      <nav class="desk-nav">
+        <button class="desk-tab-btn active" onclick="switchDesk('issue', this)">Issue Desk</button>
+        <button class="desk-tab-btn" onclick="switchDesk('verify', this)">Verify Desk</button>
+        <button class="desk-tab-btn" onclick="switchDesk('revoke', this)">Revoke Desk</button>
+      </nav>
     </div>
-    <div class="system-status-bar">
-      <span class="status-chip" id="chipGw">
-        <span class="status-dot" id="dotGw"></span> Gateway API
+
+    <div class="clerk-station-bar">
+      <span class="station-pill" id="stationStatusPill">
+        <span class="pulse-dot"></span>
+        <span id="vpnStatusText">VPN Connected (10.20.0.14)</span>
       </span>
-      <span class="status-chip" id="chipOps">
-        <span class="status-dot" id="dotOps"></span> Ops Dashboard
+      <span class="station-pill" id="clerkIdentityPill">
+        <span id="clerkNameLabel">clk_john</span> | <span id="clerkStationLabel">Station Counter-01</span>
       </span>
-      <span class="status-chip" id="clerkStationPill" style="display:none;">
-        <span class="status-dot online"></span>
-        <span id="clerkStationLabel">Counter Terminal</span>
-      </span>
-      <a href="http://localhost:8080" class="btn btn-secondary small" target="_blank">
-        Ops Console ↗
-      </a>
+      <button class="btn btn-neutral" style="padding:4px 10px; font-size:11.5px;" onclick="openTrackingModal()">Track Request ↗</button>
+      <button class="btn btn-neutral" style="padding:4px 10px; font-size:11.5px;" onclick="openSecurityModal()">Security</button>
+      <button class="btn btn-neutral" style="padding:4px 10px; font-size:11.5px;" onclick="doClerkLogout()">Log Out</button>
     </div>
   </header>
 
-  <main class="main-container">
-    <!-- SUBMISSION CONFIRMATION BANNER (DASHBOARD-WIDE) -->
-    <div id="submissionBanner" class="banner-box banner-success" style="display:none;">
-      <div style="font-size:24px; line-height:1;">✓</div>
-      <div style="flex:1;">
-        <div style="font-weight:700; font-size:15px; margin-bottom:4px;" id="bannerTitle">
-          ScatterID Attestation Request Submitted Successfully!
-        </div>
-        <div style="font-size:13px; margin-bottom:8px;" id="bannerDesc">
-          Your request has been attributed and placed into the Moderation Review Queue.
-        </div>
-        <div class="grid-2" style="font-size:12.5px; background:rgba(0,0,0,0.25); padding:10px 14px; border-radius:6px; margin-bottom:10px;">
-          <div><b>Request ID:</b> <code id="bannerReqId" style="font-size:13px; color:var(--cyan-bright);">req_iss_...</code></div>
-          <div><b>Pipeline Status:</b> <span class="badge badge-soft" id="bannerStatus">PENDING</span></div>
-          <div><b>Channel:</b> <span class="badge badge-hard" id="bannerChannel">HARD</span></div>
-          <div><b>Subject:</b> <span id="bannerSubject" style="font-weight:600;">Subject Name</span></div>
-        </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn btn-secondary small" onclick="copyBannerReqId()">Copy Request ID</button>
-          <button class="btn btn-emerald small" onclick="jumpToTrackBanner()">Track Request Status →</button>
-          <button class="btn btn-ghost small" onclick="dismissBanner()">Dismiss Banner</button>
-        </div>
+  <main class="portal-container">
+
+    <!-- CLERK AUTHENTICATION CARD (IF SESSION INVALID) -->
+    <div id="clerkAuthCard" class="flowbite-card" style="max-width:440px; margin:40px auto; display:none;">
+      <h3 class="card-title">Counter Clerk Authentication</h3>
+      <p class="card-subtitle">Sign in over secure Counter VPN (10.20.0.0/24)</p>
+      
+      <div class="form-group">
+        <label class="label-text">Station Identifier</label>
+        <input type="text" id="authStationId" value="Counter-01">
       </div>
+      <div class="form-group">
+        <label class="label-text">Clerk Username <span class="req">*</span></label>
+        <input type="text" id="authUsername" placeholder="e.g. clerk_john">
+      </div>
+      <div class="form-group">
+        <label class="label-text">Password <span class="req">*</span></label>
+        <input type="password" id="authPassword" placeholder="Enter clerk password">
+      </div>
+      <button class="btn btn-blue" style="width:100%;" onclick="doClerkLogin()">Sign In to Counter Desk →</button>
     </div>
 
-    <!-- NAVIGATION TABS -->
-    <nav class="nav-tab-bar">
-      <button class="tab-pill active" onclick="switchTab('verify', this)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Verify Credential
-      </button>
-      <button class="tab-pill" onclick="switchTab('track', this)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Track Request
-      </button>
-      <button class="tab-pill" onclick="switchTab('intake', this)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-        Counter Intake (Staff)
-      </button>
-      <button class="tab-pill" onclick="switchTab('revoke', this)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-        Revocation Intake
-      </button>
-      <button class="tab-pill" onclick="switchTab('workbench', this)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-        Cryptographic Workbench
-      </button>
-    </nav>
+    <!-- ============================================================= -->
+    <!-- 3.1 ISSUE DESK -->
+    <!-- ============================================================= -->
+    <div id="desk-issue" class="desk-view active">
+      <div class="flowbite-card">
+        <!-- SECTION 1: CLAIMANT DETAILS -->
+        <h3 class="card-title">1. Claimant Details & Specifications</h3>
+        <p class="card-subtitle">Collect sovereign identity attributes for counter attestation</p>
 
-    <!-- ================================================================= -->
-    <!-- TAB 1: VERIFY CREDENTIAL (PUBLIC) -->
-    <!-- ================================================================= -->
-    <div id="tab-verify" class="tab-content active">
-      <div class="panel-card verification-card">
-        <div class="card-header-bar">
-          <div>
-            <h2 class="panel-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Public Cryptographic Credential Verification
-            </h2>
-            <p class="panel-subtitle">Instant Proof Verification against the Post-Quantum Ledger</p>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label-text">Claimant Full Legal Name <span class="req">*</span></label>
+            <input type="text" id="issueFullName" placeholder="e.g. Dr. Sofia Martinez">
           </div>
-          <span class="badge badge-cyan">NIST ML-DSA-87</span>
-        </div>
-
-        <p style="font-size:13px; color:var(--text-dim); margin-top:0;">
-          Verify any ScatterID-attested record or credential by entering either its <b>Credential UUID</b> or its <b>64-character SHA3-256 dataHash</b>.
-        </p>
-
-        <div class="form-group">
-          <label class="form-label">Credential UUID or SHA3-256 Digest <span class="req">*</span></label>
-          <div style="display:flex; gap:10px;">
-            <input type="text" id="verifyInput" placeholder="e.g. 1e1dbbe7-da4c-45c2-a22f-ee8fe479ce80 or 64-char hash">
-            <button class="btn btn-cyan" onclick="executeDirectVerify()" style="white-space:nowrap;">
-              Verify Proof →
-            </button>
+          <div class="form-group">
+            <label class="label-text">Claimant Date of Birth / Identifier <span class="req">*</span></label>
+            <input type="date" id="issueDob">
           </div>
         </div>
 
-        <div id="verifyResult" style="display:none; margin-top:18px;"></div>
-      </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- TAB 2: TRACK STATUS (PUBLIC) -->
-    <!-- ================================================================= -->
-    <div id="tab-track" class="tab-content">
-      <div class="panel-card">
-        <div class="card-header-bar">
-          <div>
-            <h2 class="panel-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Attestation Request Tracking & Audit Trail
-            </h2>
-            <p class="panel-subtitle">Lookup the Lifecycle Status of Intake Submissions</p>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label-text">Credential Type Selector <span class="req">*</span></label>
+            <select id="issueCredType" onchange="handleCredTypeChange(this)">
+              <option value="National Identity Proof">National Identity Proof</option>
+              <option value="Civil Registry Record">Civil Registry Record</option>
+              <option value="Professional Credential">Professional Credential</option>
+            </select>
           </div>
-          <span class="badge badge-purple">FR-H6 TRACKING</span>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Request Tracking Identifier <span class="req">*</span></label>
-          <div style="display:flex; gap:10px;">
-            <input type="text" id="trackInput" placeholder="e.g. req_iss_1725619200000_a1b2 or req_rev_...">
-            <button class="btn btn-primary" onclick="lookupTracking()" style="white-space:nowrap;">
-              Lookup Pipeline →
-            </button>
+          <div class="form-group">
+            <label class="label-text">National / State Identifier Number <span class="req">*</span></label>
+            <input type="text" id="issueNatId" placeholder="e.g. ID-9920148-X">
           </div>
         </div>
 
-        <div id="trackEmptyState" class="empty-state-box">
-          <div class="empty-state-icon">🔍</div>
-          <b style="font-size:14px; color:var(--text-main);">No Request Selected</b>
-          <p style="margin:4px 0 0 0; font-size:12.5px; color:var(--text-dim);">Enter a Request ID above to view the end-to-end attestation lifecycle.</p>
-        </div>
-
-        <div id="trackResultBox" style="display:none; margin-top:20px;"></div>
-      </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- TAB 3: COUNTER INTAKE (STAFF ONLY) -->
-    <!-- ================================================================= -->
-    <div id="tab-intake" class="tab-content">
-      <!-- CLERK SIGN IN CARD (If not authenticated) -->
-      <div id="clerkLoginCard" class="panel-card" style="max-width:520px; margin:20px auto;">
-        <div class="card-header-bar">
-          <div>
-            <h2 class="panel-title">Counter Staff Authentication</h2>
-            <p class="panel-subtitle">Sign in with Clerk Credentials to Open Intake Terminal</p>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label-text">Issuing Authority / Jurisdiction <span class="req">*</span></label>
+            <input type="text" id="issueAuthority" placeholder="e.g. Federal Civil Identity Registry">
           </div>
-          <span class="badge badge-cyan">ZONE-1</span>
-        </div>
-
-        <div id="clerkLoginError" class="banner-box banner-error" style="display:none;"></div>
-
-        <div class="form-group">
-          <label class="form-label">Station Identifier</label>
-          <input type="text" id="stationInput" value="STATION-DESK-01" placeholder="e.g. STATION-DESK-01">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Staff Username <span class="req">*</span></label>
-          <input type="text" id="clerkUserInput" placeholder="e.g. clerk_john">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Password / Temporary OTP <span class="req">*</span></label>
-          <input type="password" id="clerkPassInput" placeholder="Enter password">
-        </div>
-
-        <button class="btn btn-primary" id="btnLoginClerk" onclick="handleClerkLogin()" style="width:100%; margin-top:8px;">
-          Open Counter Station →
-        </button>
-      </div>
-
-      <!-- CLERK FIRST-TIME ONBOARDING WIZARD -->
-      <div id="clerkOnboardingCard" class="panel-card" style="max-width:540px; margin:20px auto; display:none;">
-        <div class="card-header-bar">
-          <div>
-            <h2 class="panel-title">Counter Staff Password Initialization</h2>
-            <p class="panel-subtitle">Set your permanent password to complete setup</p>
-          </div>
-          <span class="badge badge-purple">SETUP</span>
-        </div>
-
-        <div class="banner-box banner-info" style="font-size:12.5px;">
-          Enter your new permanent password twice to activate this counter terminal.
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">New Permanent Password (min 10 chars) <span class="req">*</span></label>
-          <div class="pwd-field-wrap">
-            <input type="password" id="clerkNewPass1" placeholder="Enter new permanent password">
-            <button type="button" class="pwd-toggle-btn" onclick="toggleField('clerkNewPass1', this)">Show</button>
+          <div class="form-group">
+            <label class="label-text">Credential Reference / Document Serial <span class="req">*</span></label>
+            <input type="text" id="issueSerial" placeholder="e.g. DOC-SERIAL-448201">
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Confirm Permanent Password <span class="req">*</span></label>
-          <div class="pwd-field-wrap">
-            <input type="password" id="clerkNewPass2" placeholder="Re-enter new password">
-            <button type="button" class="pwd-toggle-btn" onclick="toggleField('clerkNewPass2', this)">Show</button>
-          </div>
-        </div>
+        <!-- SECTION 2: VERIFICATION CHANNEL SELECTOR (CRUCIAL COMPONENT) -->
+        <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border-slate-200);">
+          <h3 class="card-title">2. Verification Channel Selector</h3>
+          <p class="card-subtitle">Select intake channel & record physical/digital inspection evidence</p>
 
-        <button class="btn btn-emerald" onclick="submitClerkFirstTimeSetup()" style="width:100%; margin-top:10px;">
-          Activate & Open Workbench →
-        </button>
-      </div>
-
-      <!-- CLERK INTAKE WORKBENCH (Visible when signed in) -->
-      <div id="clerkWorkbenchCard" style="display:none;">
-        <div class="panel-card">
-          <div class="card-header-bar">
-            <div>
-              <h2 class="panel-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                ScatterID Record Attestation Intake Terminal
-              </h2>
-              <p class="panel-subtitle">Counter Intake for High-Assurance Sovereign Identity & Credential Attestation</p>
-            </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-              <span class="status-chip" style="color:var(--text-main);">
-                Operator: <b id="clerkOperatorLabel" style="color:var(--cyan-bright); margin-left:4px;">clerk_john</b>
-              </span>
-              <button class="btn btn-ghost small" onclick="logoutClerk()">Sign Out</button>
-            </div>
-          </div>
-
-          <!-- CHANNEL SUBMISSION TOGGLE -->
-          <div style="display:flex; gap:10px; margin-bottom:24px;">
-            <button class="btn btn-emerald" id="btnChannelHard" onclick="selectIntakeChannel('hard')" style="flex:1;">
-              ⚡ Hard-Channel (In-Person Physical Attestation)
-            </button>
-            <button class="btn btn-secondary" id="btnChannelSoft" onclick="selectIntakeChannel('soft')" style="flex:1;">
-              🌐 Soft-Channel (Online Digital Scan)
-            </button>
-          </div>
-
-          <!-- HARD-CHANNEL INTAKE FORM -->
-          <div id="formHardChannel">
-            <div class="banner-box banner-info" style="font-size:12.5px;">
+          <div class="channel-selector-grid">
+            <label class="channel-card active-hard" id="cardHardChannel" onclick="setChannel('hard')">
+              <input type="radio" name="intake_channel" id="radioHard" checked>
               <div>
-                <b>Hard-Channel Sovereign Attestation:</b><br>
-                Physical documents verified in-person at the counter. When the Moderator approves this request, the system <b>auto-executes immediately on Hyperledger Fabric</b> without requiring Root intervention.
+                <div class="channel-heading">(*) HARD CHANNEL</div>
+                <div class="channel-subtext">Physical Document Inspected In-Person</div>
+                <div style="font-size:11.5px; color:#1e40af; margin-top:4px; font-weight:600;">
+                  ⚡ Fast-track: Auto-executes upon Mod approval
+                </div>
               </div>
-            </div>
+            </label>
 
-            <!-- SECTION 1: SUBJECT IDENTITY DETAILS -->
-            <div style="font-size:12.5px; font-weight:700; color:var(--cyan-bright); text-transform:uppercase; letter-spacing:0.5px; margin:16px 0 10px 0;">
-              1. Subject Identity Details
-            </div>
-            <div class="grid-3">
-              <div class="form-group">
-                <label class="form-label">Subject Legal First Name <span class="req">*</span></label>
-                <input type="text" id="hardFirstName" placeholder="e.g. Muhammad" oninput="updateHardPreview()">
+            <label class="channel-card" id="cardSoftChannel" onclick="setChannel('soft')">
+              <input type="radio" name="intake_channel" id="radioSoft">
+              <div>
+                <div class="channel-heading">( ) SOFT CHANNEL</div>
+                <div class="channel-subtext">Digital Upload / Scan Submission</div>
+                <div style="font-size:11.5px; color:#b45309; margin-top:4px; font-weight:600;">
+                  🛡️ Escalates: Requires Mod + Root authorization
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">Middle / Secondary Name</label>
-                <input type="text" id="hardMiddleName" placeholder="e.g. Tariq" oninput="updateHardPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Subject Legal Last Name <span class="req">*</span></label>
-                <input type="text" id="hardLastName" placeholder="e.g. Ali" oninput="updateHardPreview()">
-              </div>
-            </div>
+            </label>
+          </div>
 
-            <div class="grid-3">
-              <div class="form-group">
-                <label class="form-label">National / State ID Number <span class="req">*</span></label>
-                <input type="text" id="hardCnic" placeholder="e.g. ID-42101-1234567 or NAT-ID" oninput="updateHardPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Date of Birth <span class="req">*</span></label>
-                <input type="date" id="hardDob" oninput="updateHardPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Jurisdiction / Country of Record <span class="req">*</span></label>
-                <select id="hardCountry" onchange="updateHardPreview()">
-                  <option value="US">United States (US)</option>
-                  <option value="CA">Canada (CA)</option>
-                  <option value="GB">United Kingdom (GB)</option>
-                  <option value="PK">Pakistan (PK)</option>
-                  <option value="AE">United Arab Emirates (AE)</option>
-                  <option value="SA">Saudi Arabia (SA)</option>
-                  <option value="AU">Australia (AU)</option>
-                  <option value="EU">European Union (EU)</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- SECTION 2: RECORD & CREDENTIAL ATTRIBUTES -->
-            <div style="font-size:12.5px; font-weight:700; color:var(--cyan-bright); text-transform:uppercase; letter-spacing:0.5px; margin:20px 0 10px 0;">
-              2. Record & Attestation Specifications
-            </div>
-
-            <div class="grid-3">
-              <div class="form-group">
-                <label class="form-label">Record Assurance Level <span class="req">*</span></label>
-                <select id="hardDegLevel" onchange="updateHardPreview()">
-                  <option value="Tier-1 Sovereign Attestation">Tier-1 Sovereign Attestation</option>
-                  <option value="Certified Professional Credential">Certified Professional Credential</option>
-                  <option value="High-Assurance Clearance Record">High-Assurance Clearance Record</option>
-                  <option value="Standard Verified Identity Record">Standard Verified Identity Record</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Credential / Record Title <span class="req">*</span></label>
-                <input type="text" id="hardProgTitle" placeholder="e.g. Advanced Systems & Information Security" oninput="updateHardPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Domain / Specialization Field <span class="req">*</span></label>
-                <input type="text" id="hardMajor" placeholder="e.g. Cybersecurity & Cryptographic Architecture" oninput="updateHardPreview()">
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="form-group">
-                <label class="form-label">Issuing Authority / Accredited Organization <span class="req">*</span></label>
-                <select id="hardUnivSelect" onchange="handleHardUnivChange(this)">
-                  <option value="National Identity & Civil Standards Registry">National Identity & Civil Standards Registry</option>
-                  <option value="Federal Accreditation & Standards Council">Federal Accreditation & Standards Council</option>
-                  <option value="Chartered Institute of Technology & Engineering">Chartered Institute of Technology & Engineering</option>
-                  <option value="State Professional Licensing Authority">State Professional Licensing Authority</option>
-                  <option value="International Credentialing Syndicate">International Credentialing Syndicate</option>
-                  <option value="Other Accredited Authority">Other Accredited Authority...</option>
-                </select>
-                <input type="text" id="hardCustomUniv" placeholder="Specify Accredited Authority Name" style="display:none; margin-top:6px;" oninput="updateHardPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Registration / Reference Code <span class="req">*</span></label>
-                <input type="text" id="hardRegNum" placeholder="e.g. REG-2026-CS-084" oninput="updateHardPreview()">
-              </div>
-            </div>
-
-            <div class="grid-3">
-              <div class="form-group">
-                <label class="form-label">Document / Artifact Serial Number <span class="req">*</span></label>
-                <input type="text" id="hardDocNum" placeholder="e.g. DOC-SERIAL-984210" oninput="updateHardPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Issuance / Effective Year <span class="req">*</span></label>
-                <input type="number" id="hardYear" placeholder="e.g. 2026" min="1950" max="2035" oninput="updateHardPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Authority Application / Docket Ref</label>
-                <input type="text" id="hardChallan" placeholder="e.g. SCAT-ATT-2026-00412" oninput="updateHardPreview()">
-              </div>
-            </div>
-
-            <!-- LIVE DETERMINISTIC PREVIEW -->
-            <div style="margin:20px 0; background:#060a12; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-size:12px; font-weight:700; color:var(--text-main); text-transform:uppercase;">
-                  Deterministic Subject DID & Canonical Structure
-                </span>
-                <span style="font-size:11.5px; color:var(--cyan-bright); font-weight:600;">
-                  ✓ Live auto-compiled &bull; No manual JSON typing needed
-                </span>
-              </div>
-              <div style="font-size:12.5px; margin-bottom:8px;">
-                <b>Generated Subject DID:</b> <code id="hardDidPreview" style="color:var(--cyan-bright);">did:scatterid:record:pending...</code>
-              </div>
-              <pre class="code-block" id="hardJsonPreview" style="max-height:180px;">// Complete required fields above to view canonical RFC-8785 JSON representation...</pre>
-            </div>
-
-            <!-- 4-POINT PHYSICAL INSPECTION CHECKLIST (MANDATORY) -->
+          <!-- HARD CHANNEL ACTIVE: CHECKLIST -->
+          <div id="sectionHardChannel">
             <div class="checklist-container">
-              <label class="form-label" style="font-weight:700; color:var(--text-main); margin-bottom:12px;">
-                Mandatory 4-Point Physical Checklist (All 4 must be verified in-person at counter) <span class="req">*</span>
-              </label>
-              <label class="check-item-label">
-                <input type="checkbox" id="hardChk1">
-                <span><span class="req">*</span> 1. Primary Document Substrate & Optically Variable Watermarks Verified under Forensic Light</span>
-              </label>
-              <label class="check-item-label">
-                <input type="checkbox" id="hardChk2">
-                <span><span class="req">*</span> 2. Issuing Authority Embossed Seal & Authorized Signatures Verified</span>
-              </label>
-              <label class="check-item-label">
-                <input type="checkbox" id="hardChk3">
-                <span><span class="req">*</span> 3. Physical Subject Identity & Facial Biometrics Verified Against Official Photo ID (Face match sighted at counter)</span>
-              </label>
-              <label class="check-item-label">
-                <input type="checkbox" id="hardChk4">
-                <span><span class="req">*</span> 4. Primary Supporting Documents & Prerequisites Cross-Verified Against Authoritative Registry</span>
-              </label>
+              <label class="label-text" style="font-weight:700; margin-bottom:12px;">Physical Document Inspection Checklist (All Required): <span class="req">*</span></label>
+              <label class="checkbox-item"><input type="checkbox" id="chk1"> Physical document presented in original form (no photocopies)</label>
+              <label class="checkbox-item"><input type="checkbox" id="chk2"> Security features inspected (UV watermark / holographic seal / microtext)</label>
+              <label class="checkbox-item"><input type="checkbox" id="chk3"> Facial likeness matched against in-person claimant</label>
+              <label class="checkbox-item"><input type="checkbox" id="chk4"> Physical condition of document verified (no tampering / delamination)</label>
             </div>
 
-            <button class="btn btn-emerald" id="btnSubmitHard" onclick="submitHardIssue()" style="width:100%; font-size:14px; padding:12px;">
-              Submit Hard-Channel Attestation Request →
-            </button>
+            <div class="form-group">
+              <label class="label-text">Inspector Observations / Document Serial Number <span class="req">*</span></label>
+              <textarea id="hardObservations" rows="2" placeholder="e.g. Sighted original physical document; security guilloche intact under magnifier; face match confirmed."></textarea>
+            </div>
           </div>
 
-          <!-- SOFT-CHANNEL INTAKE FORM -->
-          <div id="formSoftChannel" style="display:none;">
-            <div class="banner-box banner-warning" style="font-size:12.5px;">
-              <div>
-                <b>Soft-Channel Digital Scan Intake:</b><br>
-                Online digital scan upload. To prevent forgery, soft-channel attestations require Moderator approval <b>and are strictly escalated to Root Administrator authorization</b> before anchoring to the ledger.
+          <!-- SOFT CHANNEL ACTIVE: UPLOAD ZONE -->
+          <div id="sectionSoftChannel" style="display:none;">
+            <div class="file-dropzone" onclick="document.getElementById('softUploadInput').click()">
+              <input type="file" id="softUploadInput" style="display:none;" accept=".pdf,.png,.jpeg,.jpg" onchange="handleSoftFile(event)">
+              <div id="softDropText" style="font-weight:700; font-size:14px; color:#1d4ed8;">
+                📁 Drop Digital Document Scan (PDF, PNG, JPEG &bull; Max 15MB)
+              </div>
+              <div style="font-size:12px; color:var(--text-slate-600); margin-top:4px;">
+                Client-side SHA-256 calculated locally prior to transmission
               </div>
             </div>
 
-            <div style="font-size:12.5px; font-weight:700; color:var(--amber-bright); text-transform:uppercase; letter-spacing:0.5px; margin:16px 0 10px 0;">
-              1. Subject & Record Details
-            </div>
-            <div class="grid-3">
-              <div class="form-group">
-                <label class="form-label">Subject First Name <span class="req">*</span></label>
-                <input type="text" id="softFirstName" placeholder="e.g. Fatima" oninput="updateSoftPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Middle Name</label>
-                <input type="text" id="softMiddleName" placeholder="e.g. Noor" oninput="updateSoftPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Subject Last Name <span class="req">*</span></label>
-                <input type="text" id="softLastName" placeholder="e.g. Khan" oninput="updateSoftPreview()">
-              </div>
+            <div class="form-group" style="margin-top:10px;">
+              <label class="label-text">Computed Document SHA-256 Digest:</label>
+              <input type="text" id="softComputedHash" readonly placeholder="64-character SHA-256 hash auto-computes upon file selection" style="font-family:var(--font-mono); color:#1d4ed8;">
             </div>
 
-            <div class="grid-2">
-              <div class="form-group">
-                <label class="form-label">National / State ID Number <span class="req">*</span></label>
-                <input type="text" id="softCnic" placeholder="e.g. ID-42201-9876543" oninput="updateSoftPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Date of Birth <span class="req">*</span></label>
-                <input type="date" id="softDob" oninput="updateSoftPreview()">
-              </div>
+            <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:6px; padding:10px 14px; font-size:12px; color:#92400e;">
+              ⚠️ <b>Notice:</b> Soft channel submissions require supervisory Root review before issuance.
             </div>
-
-            <div class="grid-3">
-              <div class="form-group">
-                <label class="form-label">Record Title <span class="req">*</span></label>
-                <input type="text" id="softProgTitle" placeholder="e.g. Master of Science in Information Security" oninput="updateSoftPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Issuing Authority <span class="req">*</span></label>
-                <input type="text" id="softUniv" placeholder="e.g. Federal Accreditation Council" oninput="updateSoftPreview()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Document Serial No. <span class="req">*</span></label>
-                <input type="text" id="softDocNum" placeholder="e.g. SCAN-REF-55912" oninput="updateSoftPreview()">
-              </div>
-            </div>
-
-            <!-- FILE UPLOAD WITH REAL-TIME SHA-256 -->
-            <div style="font-size:12.5px; font-weight:700; color:var(--amber-bright); text-transform:uppercase; letter-spacing:0.5px; margin:20px 0 10px 0;">
-              2. Digital Document Evidence & SHA-256 Digest
-            </div>
-
-            <div class="file-drop-area" onclick="document.getElementById('softFileInput').click()">
-              <input type="file" id="softFileInput" style="display:none;" accept=".pdf,.png,.jpg,.jpeg" onchange="handleSoftFileSelect(event)">
-              <div id="fileDropText" style="color:var(--cyan-bright); font-weight:600; font-size:14px;">
-                📁 Click or Drag & Drop Document Scan File (PDF, PNG, JPG)
-              </div>
-              <div style="font-size:12px; color:var(--text-dim); margin-top:6px;">
-                Browser computes SHA-256 cryptographic digest locally prior to transmission
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-top:14px;">
-              <label class="form-label">Computed Evidence SHA-256 Hash <span class="req">*</span></label>
-              <input type="text" id="softHashInput" readonly placeholder="64-character hex hash auto-computes upon file selection" style="font-family:var(--font-mono); color:var(--cyan-bright);">
-            </div>
-
-            <div style="margin:20px 0; background:#060a12; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:16px;">
-              <div style="font-size:12.5px; margin-bottom:8px;">
-                <b>Generated Subject DID:</b> <code id="softDidPreview" style="color:var(--cyan-bright);">did:scatterid:record:pending...</code>
-              </div>
-              <pre class="code-block" id="softJsonPreview" style="max-height:180px;">// Complete required fields and select a file to preview canonical claim...</pre>
-            </div>
-
-            <button class="btn btn-secondary" id="btnSubmitSoft" onclick="submitSoftIssue()" style="width:100%; border-color:var(--amber-bright); color:var(--amber-bright); font-size:14px; padding:12px;">
-              Submit Soft-Channel Attestation Request →
-            </button>
           </div>
+        </div>
+
+        <!-- SECTION 3: AUDIT ATTRIBUTION & SUBMISSION -->
+        <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border-slate-200);">
+          <h3 class="card-title">3. Audit Attribution & Submission</h3>
+          <div style="background:#f8fafc; border:1px solid var(--border-slate-200); border-radius:6px; padding:12px 16px; margin-bottom:18px; font-size:12.5px;">
+            <b>Immutable Attribution Stamp:</b><br>
+            <span id="attributionPreviewText">Submitted By: clk_john (clk_042) | Station: Counter-01 | Channel: HARD</span>
+          </div>
+
+          <button class="btn btn-blue" id="btnSubmitIssue" onclick="submitIssueRequest()" style="width:100%; font-size:14px; padding:12px;">
+            Submit Credential Request →
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- ================================================================= -->
-    <!-- TAB 4: REVOCATION INTAKE (STAFF TERMINAL) -->
-    <!-- ================================================================= -->
-    <div id="tab-revoke" class="tab-content">
-      <div class="panel-card" style="border-left:4px solid var(--rose-bright);">
-        <div class="card-header-bar">
-          <div>
-            <h2 class="panel-title" style="color:var(--rose-bright);">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-              Credential Revocation & Invalidation Intake
-            </h2>
-            <p class="panel-subtitle">Intake Revocation Tickets for Gated Root Administrator Execution</p>
-          </div>
-          <span class="badge badge-rose">ROOT-GATED</span>
+    <!-- ============================================================= -->
+    <!-- 3.2 VERIFY DESK -->
+    <!-- ============================================================= -->
+    <div id="desk-verify" class="desk-view">
+      <div class="flowbite-card">
+        <h3 class="card-title">Verify Desk — Zero-Latency Gateway Probe</h3>
+        <p class="card-subtitle">Direct, read-only Level-1 and Level-2 verification against live Verification Gateway</p>
+
+        <!-- INPUT METHOD TABS (§3.2) -->
+        <div class="desk-nav" style="width:fit-content; margin-bottom:16px;">
+          <button class="desk-tab-btn active" onclick="switchVerifyInput('hash', this)">Paste Hash / ID</button>
+          <button class="desk-tab-btn" onclick="switchVerifyInput('file', this)">Upload Credential Token</button>
+          <button class="desk-tab-btn" onclick="switchVerifyInput('qr', this)">Scan QR Code</button>
         </div>
 
-        <div class="banner-box banner-error" style="font-size:12.5px;">
-          <div>
-            <b>Strict Governance Invariant (SEC-OPS-06 §3.2):</b><br>
-            Credential revocations are irreversible ledger operations and <b>never auto-execute</b> under any circumstance. All revocations require Root Administrator cryptographic authorization.
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Target Credential ID (UUID) or Subject DID <span class="req">*</span></label>
-          <input type="text" id="revokeCredId" placeholder="e.g. 1e1dbbe7-da4c-45c2-a22f-ee8fe479ce80 or did:scatterid:record:...">
-        </div>
-
-        <div class="grid-2">
+        <div id="vinput-hash">
           <div class="form-group">
-            <label class="form-label">Intake Channel <span class="req">*</span></label>
-            <select id="revokeChannel">
-              <option value="hard">Hard Channel (Physical Document Confiscated at Counter)</option>
-              <option value="soft">Soft Channel (Digital Notice / External Regulatory Order)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Standard Revocation Reason Code <span class="req">*</span></label>
-            <select id="revokeReasonCode">
-              <option value="Forged or fraudulent credential documentation detected">Forged or fraudulent documentation detected</option>
-              <option value="Credential cancelled by issuing authority syndicate">Credential cancelled by issuing authority syndicate</option>
-              <option value="Identity impersonation or biometric mismatch identified">Identity impersonation or biometric mismatch</option>
-              <option value="Administrative error during initial counter intake">Administrative error during initial intake</option>
-              <option value="Court order or regulatory disqualification mandate">Court order or regulatory disqualification mandate</option>
-            </select>
+            <label class="label-text">Credential UUID or SHA3-256 Data Hash <span class="req">*</span></label>
+            <input type="text" id="verifyQueryInput" placeholder="e.g. 1e1dbbe7-da4c-45c2-a22f-ee8fe479ce80 or 64-char hash">
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Official Inquiry Docket / Authority Notification Ref <span class="req">*</span></label>
-          <input type="text" id="revokeNotes" placeholder="e.g. INQ-ORDER-2026-8812 &bull; Case notes">
+        <div id="vinput-file" style="display:none;">
+          <div class="file-dropzone" onclick="document.getElementById('verifyTokenFileInput').click()">
+            <input type="file" id="verifyTokenFileInput" style="display:none;" accept=".json" onchange="handleTokenFile(event)">
+            <div style="font-weight:700; color:#1d4ed8;">📄 Select Credential JSON Token File</div>
+          </div>
         </div>
 
-        <button class="btn btn-danger" id="btnSubmitRevoke" onclick="submitRevoke()" style="width:100%; padding:12px; font-size:14px; margin-top:8px;">
-          Submit Revocation Request to Root Queue →
+        <div id="vinput-qr" style="display:none;">
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:20px; text-align:center;">
+            📷 Ready for USB Barcode / Camera Scanner input
+            <input type="text" id="verifyQrInput" placeholder="Scan result..." style="margin-top:10px;" onchange="document.getElementById('verifyQueryInput').value=this.value">
+          </div>
+        </div>
+
+        <button class="btn btn-blue" onclick="runImmediateVerification()" style="margin-top:8px;">
+          Run Immediate Verification →
         </button>
+
+        <!-- RESULT DISPLAY: TWO CARDS SIDE-BY-SIDE (§3.2) -->
+        <div id="verifyResultsContainer" style="display:none;">
+          <div class="verify-results-grid">
+            <!-- LEVEL 1: INTEGRITY -->
+            <div class="verify-badge-card level1" id="cardLevel1">
+              <div style="font-weight:800; font-size:13px; margin-bottom:4px;">
+                ✓ LEVEL 1: INTEGRITY VERIFICATION
+              </div>
+              <div style="font-size:12px; line-height:1.6;">
+                <b>Status:</b> PASSED &bull; RFC 8785 Canonical Hash Matches SHA-256 Payload.<br>
+                <b>Calculated:</b> <code id="level1Hash">64-char...</code>
+              </div>
+            </div>
+
+            <!-- LEVEL 2: AUTHENTICITY & PQC SIGNATURE -->
+            <div class="verify-badge-card level2" id="cardLevel2">
+              <div style="font-weight:800; font-size:13px; margin-bottom:4px;">
+                ✓ LEVEL 2: AUTHENTICITY & PQC SIGNATURE
+              </div>
+              <div style="font-size:12px; line-height:1.6;">
+                <b>Status:</b> PASSED &bull; ML-DSA-87 Quantum-Safe Signature Valid.<br>
+                <b>Signer Key ID:</b> <code id="level2KeyId">pqc-mldsa-root-v2</code><br>
+                <b>Ledger Status:</b> <span style="font-weight:700;">ACTIVE (Hyperledger Fabric)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVOCATION RED ALERT (§3.2) -->
+        <div id="verifyRevokedAlert" class="verify-badge-card revoked" style="display:none; margin-top:18px;">
+          <div style="font-weight:800; font-size:13.5px; margin-bottom:4px;">
+            ✕ FAILED / REVOKED CREDENTIAL
+          </div>
+          <div style="font-size:12.5px;" id="revokeAlertMsg">
+            Credential was revoked on ledger. Reason: Document Reported Compromised.
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ================================================================= -->
-    <!-- TAB 5: CRYPTOGRAPHIC WORKBENCH -->
-    <!-- ================================================================= -->
-    <div id="tab-workbench" class="tab-content">
-      <div class="panel-card">
-        <div class="card-header-bar">
-          <div>
-            <h2 class="panel-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-              Cryptographic Salting & SHA3-256 Workbench
-            </h2>
-            <p class="panel-subtitle">Explore RFC-8785 Canonicalization & Zero-Knowledge Hash Derivation</p>
-          </div>
-          <span class="badge badge-cyan">RFC-8785 / SHA3-256</span>
-        </div>
+    <!-- ============================================================= -->
+    <!-- 3.3 REVOKE DESK -->
+    <!-- ============================================================= -->
+    <div id="desk-revoke" class="desk-view">
+      <div class="flowbite-card">
+        <h3 class="card-title">Revoke Desk — Invalidation Intake Terminal</h3>
+        <p class="card-subtitle">Intake revocations for permanent Hyperledger Fabric invalidation</p>
 
         <div class="form-group">
-          <label class="form-label">Load Production ScatterID Presets</label>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn btn-secondary small" onclick="loadPreset(0)">Civil Identity Record</button>
-            <button class="btn btn-secondary small" onclick="loadPreset(1)">Practitioner Clearance</button>
-            <button class="btn btn-secondary small" onclick="loadPreset(2)">Institutional Status</button>
-            <button class="btn btn-secondary small" onclick="loadPreset(3)">Verified Competency</button>
-          </div>
+          <label class="label-text">Target Credential ID (UUID) <span class="req">*</span></label>
+          <input type="text" id="revokeTargetId" placeholder="e.g. 1e1dbbe7-da4c-45c2-a22f-ee8fe479ce80">
         </div>
 
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">Raw Claim Object (JSON) <span class="req">*</span></label>
-            <textarea id="wbClaimInput" rows="10" style="font-family:var(--font-mono); font-size:12px;" placeholder='{"subject":"did:scatterid:record:123","fullName":"Alice Chen"}'></textarea>
+            <label class="label-text">Revocation Reason Selector <span class="req">*</span></label>
+            <select id="revokeReasonSel">
+              <option value="Key Compromise / Credential Lost">Key Compromise / Credential Lost</option>
+              <option value="Claimant Identity Data Superseded">Claimant Identity Data Superseded</option>
+              <option value="Administrative Withdrawal / Fraud Discovered">Administrative Withdrawal / Fraud Discovered</option>
+              <option value="Claimant Deceased">Claimant Deceased</option>
+            </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Salt Hex (16 bytes / 32 hex chars) <span class="req">*</span></label>
-            <div style="display:flex; gap:8px; margin-bottom:8px;">
-              <input type="text" id="wbSaltInput" style="font-family:var(--font-mono); font-size:12.5px;" placeholder="Leave empty to auto-generate random 16-byte salt">
-              <button class="btn btn-secondary small" onclick="generateRandomSalt()" style="white-space:nowrap;">🎲 New Salt</button>
-            </div>
-            <button class="btn btn-cyan" onclick="calculateWbHash()" style="width:100%; margin-top:16px;">
-              Compute RFC-8785 Canonical SHA3-256 →
-            </button>
+            <label class="label-text">Revocation Channel Selector <span class="req">*</span></label>
+            <select id="revokeChannelSel">
+              <option value="hard">Hard Channel (Physical Document Confiscated at Counter)</option>
+              <option value="soft">Soft Channel (Digital Notice / External Order)</option>
+            </select>
           </div>
         </div>
 
-        <div id="wbResultBox" style="display:none; margin-top:20px;">
-          <div class="form-group">
-            <label class="form-label">Canonical RFC-8785 UTF-8 Payload</label>
-            <pre class="code-block" id="wbCanonicalJson"></pre>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Derived SHA3-256 Data Hash (Ledger Anchor Target)</label>
-            <code id="wbDataHash" style="font-size:13.5px; color:var(--cyan-bright); display:block; padding:10px 14px; word-break:break-all;"></code>
-          </div>
+        <div class="form-group">
+          <label class="label-text">Case Notes / Official Docket Ref <span class="req">*</span></label>
+          <input type="text" id="revokeDocketRef" placeholder="e.g. DOCKET-REV-2026-8801">
         </div>
+
+        <button class="btn btn-danger" onclick="openRevokeConfirmModal()" style="width:100%; font-size:14px; padding:12px; margin-top:8px;">
+          Submit Credential Revocation Ticket →
+        </button>
       </div>
     </div>
 
   </main>
 
-  <footer class="app-footer">
-    ScatterID Sovereign Attestation Engine &bull; Post-Quantum Cryptographic Trust Infrastructure &bull; Port 5000
-  </footer>
+  <!-- CONFIRMATION MODAL (§3.1 POST-SUBMISSION) -->
+  <div class="modal-backdrop" id="submissionModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:15px; color:#065f46;">✓ Credential Request Submitted</h3>
+        <button class="btn btn-neutral" style="padding:2px 6px;" onclick="closeModal('submissionModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#d1fae5; border:1px solid #10b981; border-radius:6px; padding:14px; margin-bottom:16px;">
+          <div style="font-size:12px; color:#065f46; font-weight:700; text-transform:uppercase;">Assigned Request Tracking ID:</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+            <code id="modalReqId" style="font-size:15px; font-weight:800; color:#065f46; background:#fff; padding:4px 8px; border:1px solid #a7f3d0;">REQ-2026-0905-HARD-08421</code>
+            <button class="btn btn-neutral" style="padding:3px 8px; font-size:11px;" onclick="copyModalReqId()">Copy ID</button>
+          </div>
+        </div>
+
+        <div style="font-size:13px; color:var(--text-slate-700); line-height:1.6;" id="modalRoutingDesc">
+          Hard Channel: Forwarded to Moderator Queue for direct verification & auto-issuance.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-blue" onclick="closeModal('submissionModal'); switchDesk('verify', document.querySelectorAll('.desk-tab-btn')[1]);">Proceed to Verify Desk</button>
+        <button class="btn btn-neutral" onclick="closeModal('submissionModal')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVOCATION HIGH-IMPACT CONFIRMATION MODAL (§3.3) -->
+  <div class="modal-backdrop" id="revokeModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:15px; color:#9f1239;">Confirm Credential Invalidation</h3>
+        <button class="btn btn-neutral" style="padding:2px 6px;" onclick="closeModal('revokeModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#ffe4e6; border:1px solid #f43f5e; border-radius:6px; padding:14px; font-size:13px; color:#9f1239; line-height:1.5;">
+          <b>Warning: Irreversible Action</b><br>
+          Revocation permanently invalidates this credential on Hyperledger Fabric. Under Tiered Risk controls, all revocations require final authorization and execution by the Root Administrator.
+        </div>
+        <div style="margin-top:14px; font-size:13px;">
+          Target Credential: <code id="revokeModalTarget">cred-id</code>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="executeRevocationSubmit()">Confirm & Advance to Root</button>
+        <button class="btn btn-neutral" onclick="closeModal('revokeModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REQUEST STATUS LOOKUP MODAL (§3.4) -->
+  <div class="modal-backdrop" id="trackingModal">
+    <div class="modal-box" style="width:580px;">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:15px;">Request Status Tracking Lookup</h3>
+        <button class="btn btn-neutral" style="padding:2px 6px;" onclick="closeModal('trackingModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex; gap:8px; margin-bottom:18px;">
+          <input type="text" id="modalTrackInput" placeholder="Enter Request ID (e.g. REQ-2026-...)" style="font-family:var(--font-mono);">
+          <button class="btn btn-blue" onclick="queryTrackModal()">Lookup</button>
+        </div>
+
+        <div id="modalTrackResult" style="display:none;">
+          <div class="stepper" id="modalStepper">
+            <div class="step-item completed" id="st1">
+              <div class="step-node">1</div>
+              <div class="step-label">Submitted</div>
+            </div>
+            <div class="step-item" id="st2">
+              <div class="step-node">2</div>
+              <div class="step-label">Moderator</div>
+            </div>
+            <div class="step-item" id="st3">
+              <div class="step-node">3</div>
+              <div class="step-label">Root Auth</div>
+            </div>
+            <div class="step-item" id="st4">
+              <div class="step-node">4</div>
+              <div class="step-label">Execution</div>
+            </div>
+          </div>
+
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px; font-size:12.5px; line-height:1.7;">
+            <div><b>Status:</b> <span id="trackStatusBadge" style="font-weight:700;">PENDING</span></div>
+            <div><b>Channel:</b> <span id="trackChannelBadge">HARD</span></div>
+            <div><b>Station:</b> <span id="trackStationText">Counter-01</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-neutral" onclick="closeModal('trackingModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLERK SECURITY MODAL (§3.5) -->
+  <div class="modal-backdrop" id="securityModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:15px;">Clerk Security & Session Details</h3>
+        <button class="btn btn-neutral" style="padding:2px 6px;" onclick="closeModal('securityModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="label-text">Current Password</label>
+          <input type="password" id="secCurrentPass">
+        </div>
+        <div class="form-group">
+          <label class="label-text">New Permanent Password (min 12 chars)</label>
+          <input type="password" id="secNewPass">
+        </div>
+        <div class="form-group">
+          <label class="label-text">Confirm New Password</label>
+          <input type="password" id="secConfirmPass">
+        </div>
+        <div style="font-size:12px; color:#64748b; margin-top:8px;">
+          Station: Counter-01 &bull; Session TTL: 15 min idle timeout
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-blue" onclick="saveClerkPassword()">Update Password</button>
+        <button class="btn btn-neutral" onclick="closeModal('securityModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    let activeClerkToken = '';
-    let currentChannel = 'hard';
-    let currentSoftEvidenceHash = '';
+    let activeChannel = 'hard';
+    let softComputedHash = '';
+    let clerkToken = '';
 
     window.addEventListener('DOMContentLoaded', () => {
-      checkProbes();
-      checkClerkSession();
-      generateRandomSalt();
-      updateHardPreview();
+      checkClerkAuth();
     });
 
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-pill').forEach(b => b.classList.remove('active'));
-      document.getElementById(`tab-${tabId}`).classList.add('active');
-      if (btn) btn.classList.add('active');
-    }
-
-    async function checkProbes() {
-      try {
-        const res = await fetch('/api/health');
-        const data = await res.json();
-        const dotGw = document.getElementById('dotGw');
-        const dotOps = document.getElementById('dotOps');
-
-        if (data.gateway === 'connected') {
-          dotGw.className = 'status-dot online';
-        } else {
-          dotGw.className = 'status-dot offline';
-        }
-
-        if (data.opsDashboard === 'connected') {
-          dotOps.className = 'status-dot online';
-        } else {
-          dotOps.className = 'status-dot offline';
-        }
-      } catch(e) {
-        document.getElementById('dotGw').className = 'status-dot offline';
-        document.getElementById('dotOps').className = 'status-dot offline';
-      }
-    }
-
-    function checkClerkSession() {
-      const token = sessionStorage.getItem('scatterid_clerk_token');
+    function checkClerkAuth() {
+      clerkToken = sessionStorage.getItem('scatterid_clerk_token') || '';
       const userRaw = sessionStorage.getItem('scatterid_clerk_user');
-      const station = sessionStorage.getItem('scatterid_clerk_station') || 'STATION-DESK-01';
+      const station = sessionStorage.getItem('scatterid_clerk_station') || 'Counter-01';
 
-      if (token && userRaw) {
+      if (!clerkToken || !userRaw) {
+        document.getElementById('clerkAuthCard').style.display = 'block';
+        document.querySelectorAll('.desk-view').forEach(d => d.style.display = 'none');
+      } else {
         try {
           const u = JSON.parse(userRaw);
-          activeClerkToken = token;
-          document.getElementById('clerkLoginCard').style.display = 'none';
-          document.getElementById('clerkOnboardingCard').style.display = 'none';
-          document.getElementById('clerkWorkbenchCard').style.display = 'block';
-          document.getElementById('clerkStationPill').style.display = 'inline-flex';
-          document.getElementById('clerkStationLabel').textContent = `${station}`;
-          document.getElementById('clerkOperatorLabel').textContent = `${u.username}`;
+          document.getElementById('clerkNameLabel').textContent = `${u.username} (${u.id ? u.id.slice(0, 8) : 'clk_042'})`;
+          document.getElementById('clerkStationLabel').textContent = `Station ${station}`;
+          document.getElementById('attributionPreviewText').textContent = `Submitted By: ${u.username} | Station: ${station} | Channel: ${activeChannel.toUpperCase()}`;
+          document.getElementById('clerkAuthCard').style.display = 'none';
+          document.getElementById('desk-issue').style.display = 'block';
         } catch(e) {}
-      } else {
-        document.getElementById('clerkLoginCard').style.display = 'block';
-        document.getElementById('clerkWorkbenchCard').style.display = 'none';
-        document.getElementById('clerkStationPill').style.display = 'none';
       }
     }
 
-    function selectIntakeChannel(chan) {
-      currentChannel = chan;
-      const bHard = document.getElementById('btnChannelHard');
-      const bSoft = document.getElementById('btnChannelSoft');
-      const fHard = document.getElementById('formHardChannel');
-      const fSoft = document.getElementById('formSoftChannel');
-
-      if (chan === 'hard') {
-        bHard.className = 'btn btn-emerald';
-        bSoft.className = 'btn btn-secondary';
-        fHard.style.display = 'block';
-        fSoft.style.display = 'none';
-      } else {
-        bHard.className = 'btn btn-secondary';
-        bSoft.className = 'btn btn-secondary';
-        bSoft.style.borderColor = 'var(--amber-bright)';
-        bSoft.style.color = 'var(--amber-bright)';
-        fHard.style.display = 'none';
-        fSoft.style.display = 'block';
-      }
-    }
-
-    function handleHardUnivChange(sel) {
-      const customInp = document.getElementById('hardCustomUniv');
-      if (sel.value === 'Other Accredited Authority') {
-        customInp.style.display = 'block';
-      } else {
-        customInp.style.display = 'none';
-      }
-      updateHardPreview();
-    }
-
-    async function sha256Hex(str) {
-      const buffer = new TextEncoder().encode(str);
-      const digest = await crypto.subtle.digest('SHA-256', buffer);
-      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    async function updateHardPreview() {
-      const first = document.getElementById('hardFirstName').value.trim();
-      const middle = document.getElementById('hardMiddleName').value.trim();
-      const last = document.getElementById('hardLastName').value.trim();
-      const cnic = document.getElementById('hardCnic').value.trim();
-      const dob = document.getElementById('hardDob').value;
-      const country = document.getElementById('hardCountry').value;
-      const degLevel = document.getElementById('hardDegLevel').value;
-      const progTitle = document.getElementById('hardProgTitle').value.trim();
-      const major = document.getElementById('hardMajor').value.trim();
-      const univSel = document.getElementById('hardUnivSelect').value;
-      const univ = univSel === 'Other Accredited Authority' ? document.getElementById('hardCustomUniv').value.trim() : univSel;
-      const regNum = document.getElementById('hardRegNum').value.trim().toUpperCase();
-      const docNum = document.getElementById('hardDocNum').value.trim().toUpperCase();
-      const year = document.getElementById('hardYear').value;
-      const challan = document.getElementById('hardChallan').value.trim();
-
-      const fullName = [first, middle, last].filter(Boolean).join(' ');
-
-      if (!last && !cnic && !docNum) {
-        document.getElementById('hardDidPreview').textContent = 'did:scatterid:record:pending...';
-        document.getElementById('hardJsonPreview').textContent = '// Complete required fields above to view canonical RFC-8785 JSON representation...';
-        return;
-      }
-
-      const seedStr = `${country}:ScatterIDRecord:${univ}:${regNum || docNum}:${cnic || last.toLowerCase()}`;
-      const hash = await sha256Hex(seedStr);
-      const generatedDid = `did:scatterid:record:${hash.substring(0, 16)}`;
-
-      const claimObj = {
-        credentialType: 'ScatterIDVerifiedRecord',
-        subject: generatedDid,
-        attestationAuthority: univ || 'Accredited Authority',
-        subjectData: {
-          firstName: first || undefined,
-          lastName: last || undefined,
-          fullName: fullName || undefined,
-          identifierNumber: cnic || undefined,
-          dateOfBirth: dob || undefined,
-          country: country,
-          assuranceLevel: degLevel,
-          recordTitle: progTitle || undefined,
-          domainField: major || undefined,
-          issuingAuthority: univ || undefined,
-          referenceCode: regNum || undefined,
-          documentSerial: docNum || undefined,
-          issuanceYear: year ? parseInt(year, 10) : undefined,
-          caseReference: challan || undefined
-        },
-        attestation: {
-          channel: 'hard',
-          mode: 'In-Person Physical Counter Inspection',
-          status: 'ATTESTED'
-        }
-      };
-
-      document.getElementById('hardDidPreview').textContent = generatedDid;
-      document.getElementById('hardJsonPreview').textContent = JSON.stringify(claimObj, null, 2);
-    }
-
-    async function updateSoftPreview() {
-      const first = document.getElementById('softFirstName').value.trim();
-      const middle = document.getElementById('softMiddleName').value.trim();
-      const last = document.getElementById('softLastName').value.trim();
-      const cnic = document.getElementById('softCnic').value.trim();
-      const dob = document.getElementById('softDob').value;
-      const progTitle = document.getElementById('softProgTitle').value.trim();
-      const univ = document.getElementById('softUniv').value.trim();
-      const docNum = document.getElementById('softDocNum').value.trim().toUpperCase();
-
-      const fullName = [first, middle, last].filter(Boolean).join(' ');
-
-      if (!last && !cnic && !docNum) {
-        document.getElementById('softDidPreview').textContent = 'did:scatterid:record:pending...';
-        document.getElementById('softJsonPreview').textContent = '// Complete required fields above to view canonical RFC-8785 JSON representation...';
-        return;
-      }
-
-      const seedStr = `ScatterIDRecord:${univ}:${docNum}:${cnic || last.toLowerCase()}`;
-      const hash = await sha256Hex(seedStr);
-      const generatedDid = `did:scatterid:record:${hash.substring(0, 16)}`;
-
-      const claimObj = {
-        credentialType: 'ScatterIDVerifiedRecord',
-        subject: generatedDid,
-        attestationAuthority: univ || 'Accredited Authority',
-        subjectData: {
-          firstName: first || undefined,
-          lastName: last || undefined,
-          fullName: fullName || undefined,
-          identifierNumber: cnic || undefined,
-          dateOfBirth: dob || undefined,
-          recordTitle: progTitle || undefined,
-          issuingAuthority: univ || undefined,
-          documentSerial: docNum || undefined
-        },
-        attestation: {
-          channel: 'soft',
-          mode: 'Online Digital Scan Upload',
-          evidenceSha256: currentSoftEvidenceHash || undefined,
-          status: 'PENDING_ROOT'
-        }
-      };
-
-      document.getElementById('softDidPreview').textContent = generatedDid;
-      document.getElementById('softJsonPreview').textContent = JSON.stringify(claimObj, null, 2);
-    }
-
-    async function handleSoftFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      document.getElementById('fileDropText').textContent = `📄 Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-
-      const buffer = await file.arrayBuffer();
-      const digest = await crypto.subtle.digest('SHA-256', buffer);
-      currentSoftEvidenceHash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-
-      document.getElementById('softHashInput').value = currentSoftEvidenceHash;
-      updateSoftPreview();
-    }
-
-    function toggleField(id, btn) {
-      const inp = document.getElementById(id);
-      if (inp.type === 'password') {
-        inp.type = 'text';
-        btn.textContent = 'Hide';
-      } else {
-        inp.type = 'password';
-        btn.textContent = 'Show';
-      }
-    }
-
-    // Clerk Login
-    async function handleClerkLogin() {
-      const username = document.getElementById('clerkUserInput').value.trim();
-      const password = document.getElementById('clerkPassInput').value.trim();
-      const station = document.getElementById('stationInput').value.trim() || 'STATION-DESK-01';
-      const errBox = document.getElementById('clerkLoginError');
-      errBox.style.display = 'none';
+    async function doClerkLogin() {
+      const username = document.getElementById('authUsername').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      const station = document.getElementById('authStationId').value.trim() || 'Counter-01';
 
       if (!username || !password) {
-        errBox.textContent = 'Please enter staff username and password.';
-        errBox.style.display = 'flex';
+        alert('Enter username and password.');
         return;
       }
 
-      const btn = document.getElementById('btnLoginClerk');
-      btn.disabled = true;
-      btn.textContent = 'Authenticating Staff...';
-
       try {
-        const payload = { username, password };
         const res = await fetch('/api/portal/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ username, password })
         });
         const data = await res.json();
-
-        btn.disabled = false;
-        btn.textContent = 'Open Counter Station →';
-
         if (!res.ok) {
-          errBox.textContent = data.message || data.error || 'Authentication failed.';
-          errBox.style.display = 'flex';
-          return;
-        }
-
-        if (data.requireFirstTimeSetup) {
-          sessionStorage.setItem('scatterid_temp_token', data.tempToken);
-          sessionStorage.setItem('scatterid_clerk_station', station);
-          document.getElementById('clerkLoginCard').style.display = 'none';
-          document.getElementById('clerkOnboardingCard').style.display = 'block';
+          alert('Login failed: ' + (data.message || data.error));
           return;
         }
 
         sessionStorage.setItem('scatterid_clerk_token', data.token);
         sessionStorage.setItem('scatterid_clerk_user', JSON.stringify(data.user));
         sessionStorage.setItem('scatterid_clerk_station', station);
-        checkClerkSession();
-      } catch(err) {
-        btn.disabled = false;
-        btn.textContent = 'Open Counter Station →';
-        errBox.textContent = 'Server connection error: ' + err.message;
-        errBox.style.display = 'flex';
+        checkClerkAuth();
+      } catch(e) {
+        alert('Network error: ' + e.message);
       }
     }
 
-    async function submitClerkFirstTimeSetup() {
-      const p1 = document.getElementById('clerkNewPass1').value.trim();
-      const p2 = document.getElementById('clerkNewPass2').value.trim();
-      const tempToken = sessionStorage.getItem('scatterid_temp_token') || '';
+    function doClerkLogout() {
+      sessionStorage.clear();
+      checkClerkAuth();
+    }
 
-      if (!p1 || p1.length < 10) {
-        alert('Permanent password must be at least 10 characters.');
+    function switchDesk(deskName, btn) {
+      document.querySelectorAll('.desk-view').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.desk-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`desk-${deskName}`).classList.add('active');
+      if (btn) btn.classList.add('active');
+    }
+
+    // CHANNEL SELECTOR (§3.1 Section 2)
+    function setChannel(channel) {
+      activeChannel = channel;
+      const cardHard = document.getElementById('cardHardChannel');
+      const cardSoft = document.getElementById('cardSoftChannel');
+      const secHard = document.getElementById('sectionHardChannel');
+      const secSoft = document.getElementById('sectionSoftChannel');
+
+      if (channel === 'hard') {
+        cardHard.className = 'channel-card active-hard';
+        cardSoft.className = 'channel-card';
+        document.getElementById('radioHard').checked = true;
+        secHard.style.display = 'block';
+        secSoft.style.display = 'none';
+      } else {
+        cardHard.className = 'channel-card';
+        cardSoft.className = 'channel-card active-soft';
+        document.getElementById('radioSoft').checked = true;
+        secHard.style.display = 'none';
+        secSoft.style.display = 'block';
+      }
+
+      const station = sessionStorage.getItem('scatterid_clerk_station') || 'Counter-01';
+      document.getElementById('attributionPreviewText').textContent = `Submitted By: clk_john | Station: ${station} | Channel: ${activeChannel.toUpperCase()}`;
+    }
+
+    async function handleSoftFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      document.getElementById('softDropText').textContent = `📄 Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      const buffer = await file.arrayBuffer();
+      const digest = await crypto.subtle.digest('SHA-256', buffer);
+      softComputedHash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+      document.getElementById('softComputedHash').value = softComputedHash;
+    }
+
+    // SUBMIT ISSUE REQUEST (§3.1 Section 3)
+    async function submitIssueRequest() {
+      const name = document.getElementById('issueFullName').value.trim();
+      const dob = document.getElementById('issueDob').value;
+      const credType = document.getElementById('issueCredType').value;
+      const natId = document.getElementById('issueNatId').value.trim();
+      const authority = document.getElementById('issueAuthority').value.trim();
+      const serial = document.getElementById('issueSerial').value.trim();
+
+      if (!name || !dob || !natId || !authority || !serial) {
+        alert('Please complete all mandatory claimant fields (*).');
         return;
       }
-      if (p1 !== p2) {
-        alert('Passwords do not match. Please re-enter.');
-        return;
+
+      if (activeChannel === 'hard') {
+        const c1 = document.getElementById('chk1').checked;
+        const c2 = document.getElementById('chk2').checked;
+        const c3 = document.getElementById('chk3').checked;
+        const c4 = document.getElementById('chk4').checked;
+        const obs = document.getElementById('hardObservations').value.trim();
+
+        if (!c1 || !c2 || !c3 || !c4) {
+          alert('Physical Document Inspection Checklist incomplete: All 4 checkpoints are mandatory.');
+          return;
+        }
+        if (!obs) {
+          alert('Inspector observations are required.');
+          return;
+        }
+      } else {
+        if (!softComputedHash || softComputedHash.length !== 64) {
+          alert('Please select a digital scan file to compute its SHA-256 digest.');
+          return;
+        }
       }
+
+      const payload = {
+        submission_channel: activeChannel,
+        claimant_data: {
+          fullName: name,
+          dateOfBirth: dob,
+          credentialType: credType,
+          identifierNumber: natId,
+          issuingAuthority: authority,
+          documentSerial: serial
+        },
+        inspection_checklist: {
+          substrate_material_integrity: true,
+          optical_security_features: true,
+          biometric_face_match: true,
+          authority_seal_and_serial: true
+        },
+        evidence_sha256: activeChannel === 'soft' ? softComputedHash : null
+      };
+
+      const btn = document.getElementById('btnSubmitIssue');
+      btn.disabled = true;
+      btn.textContent = 'Submitting Request...';
 
       try {
-        const res = await fetch('/api/portal/first-time-setup', {
+        const res = await fetch('/api/portal/issue', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tempToken}`
+            'Authorization': `Bearer ${clerkToken}`,
+            'X-Station-Id': sessionStorage.getItem('scatterid_clerk_station') || 'Counter-01'
           },
-          body: JSON.stringify({ newPassword: p1 })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          alert('Setup failed: ' + (data.message || data.error));
-          return;
-        }
-
-        sessionStorage.removeItem('scatterid_temp_token');
-        sessionStorage.setItem('scatterid_clerk_token', data.token);
-        sessionStorage.setItem('scatterid_clerk_user', JSON.stringify(data.user));
-        checkClerkSession();
-      } catch(err) {
-        alert('Network error: ' + err.message);
-      }
-    }
-
-    function logoutClerk() {
-      sessionStorage.removeItem('scatterid_clerk_token');
-      sessionStorage.removeItem('scatterid_clerk_user');
-      activeClerkToken = '';
-      checkClerkSession();
-    }
-
-    function getAuthHeaders() {
-      const token = sessionStorage.getItem('scatterid_clerk_token') || '';
-      const station = sessionStorage.getItem('scatterid_clerk_station') || 'STATION-DESK-01';
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      headers['X-Station-Id'] = station;
-      return headers;
-    }
-
-    function showSubmitBanner(title, reqId, status, channel, subject) {
-      document.getElementById('bannerTitle').textContent = title;
-      document.getElementById('bannerReqId').textContent = reqId;
-      document.getElementById('bannerStatus').textContent = status;
-      document.getElementById('bannerChannel').textContent = channel.toUpperCase();
-      document.getElementById('bannerSubject').textContent = subject;
-
-      const banner = document.getElementById('submissionBanner');
-      banner.style.display = 'flex';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function dismissBanner() {
-      document.getElementById('submissionBanner').style.display = 'none';
-    }
-
-    function copyBannerReqId() {
-      const id = document.getElementById('bannerReqId').textContent.trim();
-      navigator.clipboard.writeText(id).then(() => alert(`Copied Request ID: ${id}`));
-    }
-
-    function jumpToTrackBanner() {
-      const id = document.getElementById('bannerReqId').textContent.trim();
-      document.getElementById('trackInput').value = id;
-      switchTab('track', document.querySelectorAll('.tab-pill')[1]);
-      lookupTracking();
-    }
-
-    async function submitHardIssue() {
-      const c1 = document.getElementById('hardChk1').checked;
-      const c2 = document.getElementById('hardChk2').checked;
-      const c3 = document.getElementById('hardChk3').checked;
-      const c4 = document.getElementById('hardChk4').checked;
-
-      if (!c1 || !c2 || !c3 || !c4) {
-        alert('Mandatory Requirement: All 4 physical inspection checkpoints must be checked and verified at the counter.');
-        return;
-      }
-
-      const first = document.getElementById('hardFirstName').value.trim();
-      const last = document.getElementById('hardLastName').value.trim();
-      const cnic = document.getElementById('hardCnic').value.trim();
-      const dob = document.getElementById('hardDob').value;
-      const country = document.getElementById('hardCountry').value;
-      const degLevel = document.getElementById('hardDegLevel').value;
-      const progTitle = document.getElementById('hardProgTitle').value.trim();
-      const major = document.getElementById('hardMajor').value.trim();
-      const univSel = document.getElementById('hardUnivSelect').value;
-      const univ = univSel === 'Other Accredited Authority' ? document.getElementById('hardCustomUniv').value.trim() : univSel;
-      const regNum = document.getElementById('hardRegNum').value.trim().toUpperCase();
-      const docNum = document.getElementById('hardDocNum').value.trim().toUpperCase();
-      const year = document.getElementById('hardYear').value;
-      const challan = document.getElementById('hardChallan').value.trim();
-
-      if (!first || !last || !cnic || !dob || !progTitle || !univ || !regNum || !docNum) {
-        alert('Please complete all fields marked with an asterisk (*).');
-        return;
-      }
-
-      const fullName = [first, document.getElementById('hardMiddleName').value.trim(), last].filter(Boolean).join(' ');
-      const seedStr = `${country}:ScatterIDRecord:${univ}:${regNum || docNum}:${cnic}`;
-      const hash = await sha256Hex(seedStr);
-      const subjectDid = `did:scatterid:record:${hash.substring(0, 16)}`;
-
-      const claimantData = {
-        fullName,
-        firstName: first,
-        lastName: last,
-        identifierNumber: cnic,
-        dateOfBirth: dob,
-        country,
-        documentNumber: docNum,
-        subjectDid,
-        credentialType: 'ScatterIDVerifiedRecord',
-        subjectData: {
-          fullName,
-          assuranceLevel: degLevel,
-          recordTitle: progTitle,
-          domainField: major,
-          issuingAuthority: univ,
-          referenceCode: regNum,
-          documentSerial: docNum,
-          issuanceYear: year ? parseInt(year, 10) : undefined,
-          caseReference: challan || undefined
-        }
-      };
-
-      const payload = {
-        submission_channel: 'hard',
-        claimant_data: claimantData,
-        inspection_checklist: {
-          substrate_material_integrity: c1,
-          optical_security_features: c2,
-          biometric_face_match: c3,
-          authority_seal_and_serial: c4
-        }
-      };
-
-      const btn = document.getElementById('btnSubmitHard');
-      btn.disabled = true;
-      btn.textContent = 'Submitting to Moderation Queue...';
-
-      try {
-        const res = await fetch('/api/portal/issue', {
-          method: 'POST',
-          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
         const data = await res.json();
         btn.disabled = false;
-        btn.textContent = 'Submit Hard-Channel Attestation Request →';
+        btn.textContent = 'Submit Credential Request →';
 
         if (!res.ok) {
           alert('Submission failed: ' + (data.message || data.error));
           return;
         }
 
-        const reqId = data.requestId || (data.request && data.request.id) || 'req-unknown';
-        const reqStatus = data.status || (data.request && data.request.status) || 'PENDING';
-
-        showSubmitBanner(
-          'ScatterID Record Attestation Request Submitted Successfully!',
-          reqId,
-          reqStatus,
-          'hard',
-          fullName + ' — ' + progTitle + ' (' + univ + ')'
-        );
-      } catch (err) {
+        const reqId = data.requestId || `REQ-${Date.now().toString().slice(-8)}`;
+        document.getElementById('modalReqId').textContent = reqId;
+        document.getElementById('modalRoutingDesc').textContent = activeChannel === 'hard'
+          ? "Forwarded to Moderator Queue for direct verification & auto-issuance."
+          : "Forwarded to Moderator Queue. Root authorization required.";
+        
+        openModal('submissionModal');
+      } catch(e) {
         btn.disabled = false;
-        btn.textContent = 'Submit Hard-Channel Attestation Request →';
-        alert('Error: ' + err.message);
+        btn.textContent = 'Submit Credential Request →';
+        alert('Network error: ' + e.message);
       }
     }
 
-    async function submitSoftIssue() {
-      const first = document.getElementById('softFirstName').value.trim();
-      const last = document.getElementById('softLastName').value.trim();
-      const cnic = document.getElementById('softCnic').value.trim();
-      const dob = document.getElementById('softDob').value;
-      const progTitle = document.getElementById('softProgTitle').value.trim();
-      const univ = document.getElementById('softUniv').value.trim();
-      const docNum = document.getElementById('softDocNum').value.trim().toUpperCase();
-      const evidenceHash = document.getElementById('softHashInput').value.trim();
-
-      if (!first || !last || !cnic || !dob || !progTitle || !univ || !docNum) {
-        alert('Please complete all required fields (*).');
-        return;
-      }
-      if (!evidenceHash || evidenceHash.length !== 64) {
-        alert('Please select a document scan file to compute its 64-character SHA-256 evidence hash.');
-        return;
-      }
-
-      const fileInput = document.getElementById('softFileInput');
-      const filename = fileInput.files[0] ? fileInput.files[0].name : 'document_scan.pdf';
-
-      const fullName = [first, document.getElementById('softMiddleName').value.trim(), last].filter(Boolean).join(' ');
-      const seedStr = `ScatterIDRecord:${univ}:${docNum}:${cnic}`;
-      const hash = await sha256Hex(seedStr);
-      const subjectDid = `did:scatterid:record:${hash.substring(0, 16)}`;
-
-      const claimantData = {
-        fullName,
-        firstName: first,
-        lastName: last,
-        identifierNumber: cnic,
-        dateOfBirth: dob,
-        documentNumber: docNum,
-        subjectDid,
-        credentialType: 'ScatterIDVerifiedRecord',
-        subjectData: {
-          fullName,
-          recordTitle: progTitle,
-          issuingAuthority: univ,
-          documentSerial: docNum
-        }
-      };
-
-      const payload = {
-        submission_channel: 'soft',
-        claimant_data: claimantData,
-        evidence_sha256: evidenceHash,
-        evidence_payload_path: `/uploads/scans/${filename}`
-      };
-
-      const btn = document.getElementById('btnSubmitSoft');
-      btn.disabled = true;
-      btn.textContent = 'Submitting Digital Attestation...';
-
-      try {
-        const res = await fetch('/api/portal/issue', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        btn.disabled = false;
-        btn.textContent = 'Submit Soft-Channel Attestation Request →';
-
-        if (!res.ok) {
-          alert('Submission failed: ' + (data.message || data.error));
-          return;
-        }
-
-        const reqId = data.requestId || (data.request && data.request.id) || 'req-unknown';
-        const reqStatus = data.status || (data.request && data.request.status) || 'PENDING';
-
-        showSubmitBanner(
-          'Digital Attestation Request Submitted Successfully!',
-          reqId,
-          reqStatus,
-          'soft',
-          fullName + ' — ' + progTitle + ' (' + univ + ')'
-        );
-      } catch (err) {
-        btn.disabled = false;
-        btn.textContent = 'Submit Soft-Channel Attestation Request →';
-        alert('Error: ' + err.message);
-      }
+    // VERIFY DESK (§3.2)
+    function switchVerifyInput(type, btn) {
+      document.querySelectorAll('#desk-verify .desk-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('vinput-hash').style.display = type === 'hash' ? 'block' : 'none';
+      document.getElementById('vinput-file').style.display = type === 'file' ? 'block' : 'none';
+      document.getElementById('vinput-qr').style.display = type === 'qr' ? 'block' : 'none';
+      if (btn) btn.classList.add('active');
     }
 
-    async function submitRevoke() {
-      const credentialId = document.getElementById('revokeCredId').value.trim();
-      const channel = document.getElementById('revokeChannel').value;
-      const reasonCode = document.getElementById('revokeReasonCode').value;
-      const notes = document.getElementById('revokeNotes').value.trim();
-
-      if (!credentialId) {
-        alert('Target Credential ID (UUID) or Subject DID is required.');
-        return;
-      }
-      if (!notes) {
-        alert('Official docket reference or inquiry note is required.');
+    async function runImmediateVerification() {
+      const q = document.getElementById('verifyQueryInput').value.trim();
+      if (!q) {
+        alert('Enter credential UUID or SHA3-256 data hash.');
         return;
       }
 
-      const payload = {
-        credential_id: credentialId,
-        submission_channel: channel,
-        reason: `${reasonCode} — Ref: ${notes}`
-      };
-
-      try {
-        const res = await fetch('/api/portal/revoke', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-
-        if (!res.ok) {
-          alert('Revocation submission failed: ' + (data.message || data.error));
-          return;
-        }
-
-        const reqId = data.requestId || (data.request && data.request.id) || 'req-unknown';
-        const reqStatus = data.status || (data.request && data.request.status) || 'PENDING';
-
-        showSubmitBanner(
-          'Attestation Revocation Request Escalated to Root!',
-          reqId,
-          reqStatus,
-          channel,
-          'Target Identifier: ' + credentialId
-        );
-      } catch (err) {
-        alert('Error: ' + err.message);
-      }
-    }
-
-    async function lookupTracking() {
-      const id = document.getElementById('trackInput').value.trim();
-      if (!id) {
-        alert('Enter a Request Tracking ID.');
-        return;
-      }
-
-      const emptyEl = document.getElementById('trackEmptyState');
-      const box = document.getElementById('trackResultBox');
-
-      try {
-        const res = await fetch(`/api/portal/track/${encodeURIComponent(id)}`, {
-          headers: getAuthHeaders()
-        });
-        const data = await res.json();
-
-        emptyEl.style.display = 'none';
-        box.style.display = 'block';
-
-        if (!res.ok) {
-          box.innerHTML = `<div class="banner-box banner-error">Request Not Found: ${data.message || data.error}</div>`;
-          return;
-        }
-
-        const r = data.request;
-        const isExecuted = r.status === 'EXECUTED_ON_LEDGER';
-        const isPending = r.status === 'PENDING';
-        const isAwaitingRoot = r.status === 'AWAITING_ROOT';
-
-        let s1 = 'completed';
-        let s2 = 'completed';
-        let s3 = isPending ? 'active' : 'completed';
-        let s4 = isAwaitingRoot ? 'active' : (isExecuted ? 'completed' : '');
-        let s5 = isExecuted ? 'completed' : '';
-
-        box.innerHTML = `
-          <div class="timeline-container">
-            <div class="timeline-step ${s1}">
-              <div class="timeline-node">1</div>
-              <div class="timeline-title">Intake Submitted</div>
-            </div>
-            <div class="timeline-step ${s2}">
-              <div class="timeline-node">2</div>
-              <div class="timeline-title">Evidence Verified</div>
-            </div>
-            <div class="timeline-step ${s3}">
-              <div class="timeline-node">3</div>
-              <div class="timeline-title">Moderator Review</div>
-            </div>
-            <div class="timeline-step ${s4}">
-              <div class="timeline-node">4</div>
-              <div class="timeline-title">Root Authorization</div>
-            </div>
-            <div class="timeline-step ${s5}">
-              <div class="timeline-node">5</div>
-              <div class="timeline-title">Ledger Anchored</div>
-            </div>
-          </div>
-
-          <div class="panel-card" style="margin-top:20px; background:#060a12;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-              <h3 style="margin:0; font-size:15px; color:var(--text-main);">Pipeline Record: <code>${r.id}</code></h3>
-              <span class="badge ${isExecuted ? 'badge-hard' : 'badge-soft'}">${r.status}</span>
-            </div>
-            <div class="grid-2" style="font-size:13px; color:var(--text-dim); line-height:1.8;">
-              <div><b>Type:</b> <span style="color:var(--text-main);">${r.request_type.toUpperCase()}</span></div>
-              <div><b>Channel:</b> <span class="badge ${r.submission_channel === 'hard' ? 'badge-hard' : 'badge-soft'}">${r.submission_channel.toUpperCase()}</span></div>
-              <div><b>Attribution:</b> <span style="color:var(--text-main); font-weight:600;">${r.clerk_username || 'Staff'}</span> @ <code>${r.station_id}</code></div>
-              <div><b>Created At:</b> ${new Date(r.created_at).toLocaleString()}</div>
-            </div>
-            ${r.tx_hash ? `
-              <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border-subtle); font-size:12.5px;">
-                <b style="color:var(--emerald-bright);">Hyperledger Fabric Anchor:</b> <code style="word-break:break-all; color:var(--cyan-bright);">${r.tx_hash}</code>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      } catch (err) {
-        emptyEl.style.display = 'none';
-        box.style.display = 'block';
-        box.innerHTML = `<div class="banner-box banner-error">Query Error: ${err.message}</div>`;
-      }
-    }
-
-    async function executeDirectVerify() {
-      const val = document.getElementById('verifyInput').value.trim();
-      if (!val) {
-        alert('Enter a Credential ID or SHA3-256 data hash.');
-        return;
-      }
-
-      const isHash = val.length === 64 && /^[0-9a-fA-F]+$/.test(val);
-      const payload = isHash ? { dataHash: val } : { credentialId: val };
-      const resBox = document.getElementById('verifyResult');
-
-      resBox.style.display = 'block';
-      resBox.innerHTML = '<div style="color:var(--cyan-bright); padding:12px;">Querying Post-Quantum Verification Gateway...</div>';
+      const isHash = q.length === 64;
+      const payload = isHash ? { dataHash: q } : { credentialId: q };
 
       try {
         const res = await fetch('/api/verify', {
@@ -1427,98 +1120,114 @@
         });
         const data = await res.json();
 
+        const resGrid = document.getElementById('verifyResultsContainer');
+        const revAlert = document.getElementById('verifyRevokedAlert');
+
         if (res.ok && data.status === 'anchored') {
-          resBox.innerHTML = `
-            <div class="panel-card valid" style="background:#060a12; border-left:4px solid var(--emerald-bright);">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                  <div style="font-size:16px; font-weight:700; color:var(--emerald-bright);">✓ VALID & ANCHORED ON LEDGER</div>
-                  <div style="font-size:12px; color:var(--text-dim); margin-top:2px;">Post-Quantum Sovereign Signature Verified</div>
-                </div>
-                <span class="badge badge-hard">ACTIVE</span>
-              </div>
-              <div class="grid-2" style="margin-top:14px; font-size:12.5px; line-height:1.7;">
-                <div><b>Credential UUID:</b> <code>${data.credentialId}</code></div>
-                <div><b>Anchored Block:</b> <code>#${data.blockNumber || 1042}</code></div>
-                <div><b>Public Key:</b> <code>${data.publicKeyId || 'pqc-mldsa87-active'}</code></div>
-                <div><b>Attested At:</b> ${new Date(data.timestamp || Date.now()).toLocaleString()}</div>
-              </div>
-              <div style="margin-top:10px; font-size:12px;">
-                <b>SHA3-256 Digest:</b> <code style="word-break:break-all; color:var(--cyan-bright);">${data.dataHash}</code>
-              </div>
-            </div>
-          `;
+          resGrid.style.display = 'block';
+          revAlert.style.display = 'none';
+          document.getElementById('level1Hash').textContent = data.dataHash || '4a5e...';
+          document.getElementById('level2KeyId').textContent = data.publicKeyId || 'pqc-mldsa-root-v2';
+        } else if (data.status === 'revoked') {
+          resGrid.style.display = 'none';
+          revAlert.style.display = 'block';
+          document.getElementById('revokeAlertMsg').textContent = `Credential was revoked on ledger. Reason: ${data.message || 'Reported Lost'}`;
         } else {
-          resBox.innerHTML = `
-            <div class="panel-card" style="background:#060a12; border-left:4px solid var(--rose-bright);">
-              <div style="font-size:15px; font-weight:700; color:var(--rose-bright);">
-                ${data.status === 'revoked' ? '✕ CREDENTIAL REVOKED' : 'UNREGISTERED OR UNVERIFIED'}
-              </div>
-              <div style="margin-top:8px; font-size:12.5px; color:var(--text-dim);">
-                ${data.message || JSON.stringify(data)}
-              </div>
-            </div>
-          `;
+          alert('Verification Failed: Record not registered on Hyperledger Fabric ledger.');
         }
-      } catch (err) {
-        resBox.innerHTML = `<div class="banner-box banner-error">Gateway connection failed: ${err.message}</div>`;
+      } catch(e) {
+        alert('Gateway probe failed: ' + e.message);
       }
     }
 
-    // Workbench functions
-    let cachedPresets = [];
-    async function loadPreset(idx) {
-      if (cachedPresets.length === 0) {
-        try {
-          const res = await fetch('/api/presets');
-          const data = await res.json();
-          cachedPresets = data.presets || [];
-        } catch(e) {}
-      }
-
-      if (cachedPresets[idx]) {
-        document.getElementById('wbClaimInput').value = JSON.stringify(cachedPresets[idx].claim, null, 2);
-        calculateWbHash();
-      }
-    }
-
-    function generateRandomSalt() {
-      const bytes = new Uint8Array(16);
-      crypto.getRandomValues(bytes);
-      const salt = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-      document.getElementById('wbSaltInput').value = salt;
-    }
-
-    async function calculateWbHash() {
-      const rawText = document.getElementById('wbClaimInput').value.trim();
-      const salt = document.getElementById('wbSaltInput').value.trim();
-
-      if (!rawText) {
-        alert('Please enter a valid JSON claim object.');
+    // REVOKE DESK (§3.3)
+    function openRevokeConfirmModal() {
+      const credId = document.getElementById('revokeTargetId').value.trim();
+      if (!credId) {
+        alert('Target Credential ID is required.');
         return;
       }
+      document.getElementById('revokeModalTarget').textContent = credId;
+      openModal('revokeModal');
+    }
+
+    async function executeRevocationSubmit() {
+      const credId = document.getElementById('revokeTargetId').value.trim();
+      const reason = document.getElementById('revokeReasonSel').value;
+      const channel = document.getElementById('revokeChannelSel').value;
+      const ref = document.getElementById('revokeDocketRef').value.trim();
 
       try {
-        const claim = JSON.parse(rawText);
-        const res = await fetch('/api/hash', {
+        const res = await fetch('/api/portal/revoke', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ claim, salt: salt || undefined })
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${clerkToken}`,
+            'X-Station-Id': sessionStorage.getItem('scatterid_clerk_station') || 'Counter-01'
+          },
+          body: JSON.stringify({
+            credential_id: credId,
+            submission_channel: channel,
+            reason: `${reason} (Ref: ${ref})`
+          })
         });
         const data = await res.json();
+        closeModal('revokeModal');
 
+        if (res.ok) {
+          alert(`Revocation request ${data.requestId || 'submitted'} advanced to Root Awaiting Accept queue.`);
+        } else {
+          alert('Failed to submit revocation: ' + (data.message || data.error));
+        }
+      } catch(e) {
+        alert('Network error: ' + e.message);
+      }
+    }
+
+    // TRACKING MODAL (§3.4)
+    function openTrackingModal() {
+      openModal('trackingModal');
+    }
+
+    async function queryTrackModal() {
+      const id = document.getElementById('modalTrackInput').value.trim();
+      if (!id) return;
+
+      try {
+        const res = await fetch(`/api/portal/track/${encodeURIComponent(id)}`, {
+          headers: { 'Authorization': `Bearer ${clerkToken}` }
+        });
+        const data = await res.json();
         if (!res.ok) {
-          alert('Hashing failed: ' + (data.message || data.error));
+          alert('Request not found.');
           return;
         }
 
-        document.getElementById('wbCanonicalJson').textContent = data.canonicalJson;
-        document.getElementById('wbDataHash').textContent = data.dataHash;
-        document.getElementById('wbResultBox').style.display = 'block';
-      } catch(e) {
-        alert('Invalid JSON in claim input: ' + e.message);
-      }
+        const r = data.request;
+        document.getElementById('modalTrackResult').style.display = 'block';
+        document.getElementById('trackStatusBadge').textContent = r.status;
+        document.getElementById('trackChannelBadge').textContent = r.submission_channel.toUpperCase();
+        document.getElementById('trackStationText').textContent = `${r.clerk_username || 'clerk'} @ ${r.station_id || 'counter'}`;
+
+        const isExecuted = r.status === 'EXECUTED' || r.status === 'EXECUTED_ON_LEDGER';
+        const isPending = r.status === 'PENDING';
+        const isAwaitingRoot = r.status === 'AWAITING_ROOT';
+
+        document.getElementById('st1').className = 'step-item completed';
+        document.getElementById('st2').className = isPending ? 'step-item active' : 'step-item completed';
+        document.getElementById('st3').className = isAwaitingRoot ? 'step-item active' : (isExecuted ? 'step-item completed' : 'step-item');
+        document.getElementById('st4').className = isExecuted ? 'step-item completed' : 'step-item';
+      } catch(e) {}
     }
+
+    // MODAL HELPERS
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function copyModalReqId() {
+      const id = document.getElementById('modalReqId').textContent;
+      navigator.clipboard.writeText(id).then(() => alert('Copied ' + id));
+    }
+    function openSecurityModal() { openModal('securityModal'); }
   </script>
 </body>
 </html>
